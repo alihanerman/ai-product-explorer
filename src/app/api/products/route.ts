@@ -1,36 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { ProductFiltersSchema } from '@/lib/validations';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { ProductFiltersSchema } from "@/lib/validations";
+import { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     // Parse and validate query parameters
     const rawParams = {
-      category: searchParams.get('category') || undefined,
-      brands: searchParams.get('brands')?.split(',').filter(Boolean) || undefined,
-      minPrice: searchParams.get('minPrice') || undefined,
-      maxPrice: searchParams.get('maxPrice') || undefined,
-      sortBy: searchParams.get('sortBy') || undefined,
-      page: searchParams.get('page') || '1',
-      limit: searchParams.get('limit') || '20',
+      category: searchParams.get("category") || undefined,
+      brands:
+        searchParams.get("brands")?.split(",").filter(Boolean) || undefined,
+      minPrice: searchParams.get("minPrice") || undefined,
+      maxPrice: searchParams.get("maxPrice") || undefined,
+      sortBy: searchParams.get("sortBy") || undefined,
+      page: searchParams.get("page") || "1",
+      limit: searchParams.get("limit") || "20",
     };
 
     const validatedParams = ProductFiltersSchema.parse(rawParams);
-    
+
     // Build where clause
-    const where: any = {};
-    
+    const where: Prisma.ProductWhereInput = {};
+
     if (validatedParams.category) {
       where.category = validatedParams.category;
     }
-    
+
     if (validatedParams.brands && validatedParams.brands.length > 0) {
       where.brand = { in: validatedParams.brands };
     }
-    
-    if (validatedParams.minPrice !== undefined || validatedParams.maxPrice !== undefined) {
+
+    if (
+      validatedParams.minPrice !== undefined ||
+      validatedParams.maxPrice !== undefined
+    ) {
       where.price = {};
       if (validatedParams.minPrice !== undefined) {
         where.price.gte = validatedParams.minPrice;
@@ -39,30 +44,30 @@ export async function GET(request: NextRequest) {
         where.price.lte = validatedParams.maxPrice;
       }
     }
-    
+
     // Build orderBy clause
-    let orderBy: any = { name: 'asc' }; // default
-    
+    let orderBy: Prisma.ProductOrderByWithRelationInput = { name: "asc" }; // default
+
     if (validatedParams.sortBy) {
       switch (validatedParams.sortBy) {
-        case 'price-asc':
-          orderBy = { price: 'asc' };
+        case "price-asc":
+          orderBy = { price: "asc" };
           break;
-        case 'price-desc':
-          orderBy = { price: 'desc' };
+        case "price-desc":
+          orderBy = { price: "desc" };
           break;
-        case 'rating-desc':
-          orderBy = { rating: 'desc' };
+        case "rating-desc":
+          orderBy = { rating: "desc" };
           break;
-        case 'name-asc':
-          orderBy = { name: 'asc' };
+        case "name-asc":
+          orderBy = { name: "asc" };
           break;
       }
     }
-    
+
     // Calculate pagination
     const skip = (validatedParams.page - 1) * validatedParams.limit;
-    
+
     // Fetch products and total count
     const [products, totalCount] = await Promise.all([
       prisma.product.findMany({
@@ -73,9 +78,9 @@ export async function GET(request: NextRequest) {
       }),
       prisma.product.count({ where }),
     ]);
-    
+
     const totalPages = Math.ceil(totalCount / validatedParams.limit);
-    
+
     return NextResponse.json({
       products,
       pagination: {
@@ -88,9 +93,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error("Error fetching products:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch products' },
+      { error: "Failed to fetch products" },
       { status: 500 }
     );
   }

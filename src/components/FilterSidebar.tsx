@@ -1,28 +1,38 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { useProductStore } from '@/lib/stores/productStore';
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { useProductStore } from "@/lib/stores/productStore";
 
 const CATEGORIES = [
-  { value: 'phone', label: 'Phones' },
-  { value: 'tablet', label: 'Tablets' },
-  { value: 'laptop', label: 'Laptops' },
-  { value: 'desktop', label: 'Desktops' },
+  { value: "phone", label: "Phones" },
+  { value: "tablet", label: "Tablets" },
+  { value: "laptop", label: "Laptops" },
+  { value: "desktop", label: "Desktops" },
 ];
 
 const BRANDS = [
-  'Apple', 'Samsung', 'Google', 'Dell', 'HP', 'Lenovo', 
-  'Microsoft', 'Asus', 'Acer', 'OnePlus', 'Xiaomi', 'Razer'
+  "Apple",
+  "Samsung",
+  "Google",
+  "Dell",
+  "HP",
+  "Lenovo",
+  "Microsoft",
+  "Asus",
+  "Acer",
+  "OnePlus",
+  "Xiaomi",
+  "Razer",
 ];
 
 const SORT_OPTIONS = [
-  { value: 'name-asc', label: 'Name (A-Z)' },
-  { value: 'price-asc', label: 'Price (Low to High)' },
-  { value: 'price-desc', label: 'Price (High to Low)' },
-  { value: 'rating-desc', label: 'Rating (High to Low)' },
+  { value: "name-asc", label: "Name (A-Z)" },
+  { value: "price-asc", label: "Price (Low to High)" },
+  { value: "price-desc", label: "Price (High to Low)" },
+  { value: "rating-desc", label: "Rating (High to Low)" },
 ];
 
 export function FilterSidebar() {
@@ -34,29 +44,33 @@ export function FilterSidebar() {
   }, [filters]);
 
   const handleCategoryChange = (category: string) => {
-    const newCategory = localFilters.category === category ? undefined : category;
-    setLocalFilters(prev => ({ ...prev, category: newCategory }));
+    const newCategory =
+      localFilters.category === category ? undefined : category;
+    setLocalFilters((prev) => ({ ...prev, category: newCategory }));
   };
 
   const handleBrandToggle = (brand: string) => {
     const currentBrands = localFilters.brands || [];
     const newBrands = currentBrands.includes(brand)
-      ? currentBrands.filter(b => b !== brand)
+      ? currentBrands.filter((b) => b !== brand)
       : [...currentBrands, brand];
-    
-    setLocalFilters(prev => ({ 
-      ...prev, 
-      brands: newBrands.length > 0 ? newBrands : undefined 
+
+    setLocalFilters((prev) => ({
+      ...prev,
+      brands: newBrands.length > 0 ? newBrands : undefined,
     }));
   };
 
-  const handlePriceChange = (field: 'minPrice' | 'maxPrice', value: string) => {
-    const numValue = value === '' ? undefined : parseFloat(value);
-    setLocalFilters(prev => ({ ...prev, [field]: numValue }));
+  const handlePriceChange = (field: "minPrice" | "maxPrice", value: string) => {
+    const numValue = value === "" ? undefined : parseFloat(value);
+    setLocalFilters((prev) => ({ ...prev, [field]: numValue }));
   };
 
   const handleSortChange = (sortBy: string) => {
-    setLocalFilters(prev => ({ ...prev, sortBy: sortBy as any }));
+    setLocalFilters((prev) => ({
+      ...prev,
+      sortBy: sortBy as "price-asc" | "price-desc" | "rating-desc" | "name-asc",
+    }));
   };
 
   const applyFilters = () => {
@@ -71,8 +85,8 @@ export function FilterSidebar() {
     fetchProducts();
   };
 
-  const hasActiveFilters = Object.keys(localFilters).some(key => 
-    localFilters[key as keyof typeof localFilters] !== undefined
+  const hasActiveFilters = Object.keys(localFilters).some(
+    (key) => localFilters[key as keyof typeof localFilters] !== undefined
   );
 
   return (
@@ -92,7 +106,10 @@ export function FilterSidebar() {
         <h3 className="font-medium">Category</h3>
         <div className="space-y-2">
           {CATEGORIES.map((category) => (
-            <label key={category.value} className="flex items-center space-x-2 cursor-pointer">
+            <label
+              key={category.value}
+              className="flex items-center space-x-2 cursor-pointer"
+            >
               <input
                 type="radio"
                 name="category"
@@ -111,7 +128,10 @@ export function FilterSidebar() {
         <h3 className="font-medium">Brands</h3>
         <div className="space-y-2 max-h-48 overflow-y-auto">
           {BRANDS.map((brand) => (
-            <label key={brand} className="flex items-center space-x-2 cursor-pointer">
+            <label
+              key={brand}
+              className="flex items-center space-x-2 cursor-pointer"
+            >
               <input
                 type="checkbox"
                 checked={localFilters.brands?.includes(brand) || false}
@@ -131,14 +151,14 @@ export function FilterSidebar() {
           <Input
             type="number"
             placeholder="Min price"
-            value={localFilters.minPrice || ''}
-            onChange={(e) => handlePriceChange('minPrice', e.target.value)}
+            value={localFilters.minPrice || ""}
+            onChange={(e) => handlePriceChange("minPrice", e.target.value)}
           />
           <Input
             type="number"
             placeholder="Max price"
-            value={localFilters.maxPrice || ''}
-            onChange={(e) => handlePriceChange('maxPrice', e.target.value)}
+            value={localFilters.maxPrice || ""}
+            onChange={(e) => handlePriceChange("maxPrice", e.target.value)}
           />
         </div>
       </div>
@@ -147,7 +167,7 @@ export function FilterSidebar() {
       <div className="space-y-3">
         <h3 className="font-medium">Sort By</h3>
         <select
-          value={localFilters.sortBy || ''}
+          value={localFilters.sortBy || ""}
           onChange={(e) => handleSortChange(e.target.value)}
           className="w-full p-2 border border-input rounded-md bg-background"
         >
