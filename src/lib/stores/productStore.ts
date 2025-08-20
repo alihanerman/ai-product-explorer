@@ -1,0 +1,251 @@
+import { create } from 'zustand';
+import { Product } from '@prisma/client';
+
+export interface ProductFilters {
+  category?: string;
+  brands?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: 'price-asc' | 'price-desc' | 'rating-desc' | 'name-asc';
+}
+
+export interface ProductState {
+  // Products data
+  products: Product[];
+  currentProduct: Product | null;
+  
+  // Filters and search
+  filters: ProductFilters;
+  searchQuery: string;
+  
+  // Pagination
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  
+  // UI states
+  isLoading: boolean;
+  error: string | null;
+  
+  // Favorites
+  favoriteProductIds: string[];
+  
+  // Comparison
+  comparisonList: Product[];
+  comparisonSummary: string | null;
+  isComparingLoading: boolean;
+  
+  // Actions
+  setProducts: (products: Product[], pagination?: any) => void;
+  setCurrentProduct: (product: Product | null) => void;
+  setFilters: (filters: Partial<ProductFilters>) => void;
+  setSearchQuery: (query: string) => void;
+  setCurrentPage: (page: number) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  setFavoriteProductIds: (ids: string[]) => void;
+  toggleFavorite: (productId: string) => void;
+  addToComparison: (product: Product) => void;
+  removeFromComparison: (productId: string) => void;
+  clearComparison: () => void;
+  setComparisonSummary: (summary: string | null) => void;
+  setComparingLoading: (loading: boolean) => void;
+  
+  // API actions
+  fetchProducts: () => Promise<void>;
+  fetchProduct: (id: string) => Promise<void>;
+  parseSearchQuery: (query: string) => Promise<void>;
+  fetchComparisonSummary: () => Promise<void>;
+}
+
+export const useProductStore = create<ProductState>((set, get) => ({
+  // Initial state
+  products: [],
+  currentProduct: null,
+  filters: {},
+  searchQuery: '',
+  currentPage: 1,
+  totalPages: 1,
+  totalCount: 0,
+  isLoading: false,
+  error: null,
+  favoriteProductIds: [],
+  comparisonList: [],
+  comparisonSummary: null,
+  isComparingLoading: false,
+  
+  // Basic setters
+  setProducts: (products, pagination) => set(state => ({
+    products,
+    totalPages: pagination?.totalPages || state.totalPages,
+    totalCount: pagination?.totalCount || state.totalCount,
+    currentPage: pagination?.page || state.currentPage,
+  })),
+  
+  setCurrentProduct: (product) => set({ currentProduct: product }),
+  
+  setFilters: (newFilters) => set(state => ({
+    filters: { ...state.filters, ...newFilters },
+    currentPage: 1, // Reset to first page when filters change
+  })),
+  
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  setCurrentPage: (page) => set({ currentPage: page }),
+  setLoading: (loading) => set({ isLoading: loading }),
+  setError: (error) => set({ error }),
+  
+  setFavoriteProductIds: (ids) => set({ favoriteProductIds: ids }),
+  
+  toggleFavorite: (productId) => set(state => ({
+    favoriteProductIds: state.favoriteProductIds.includes(productId)
+      ? state.favoriteProductIds.filter(id => id !== productId)
+      : [...state.favoriteProductIds, productId]
+  })),
+  
+  addToComparison: (product) => set(state => {
+    if (state.comparisonList.length >= 4) return state; // Max 4 products
+    if (state.comparisonList.some(p => p.id === product.id)) return state; // Already added
+    return { comparisonList: [...state.comparisonList, product] };
+  }),
+  
+  removeFromComparison: (productId) => set(state => ({
+    comparisonList: state.comparisonList.filter(p => p.id !== productId),
+    comparisonSummary: state.comparisonList.length <= 2 ? null : state.comparisonSummary,
+  })),
+  
+  clearComparison: () => set({ comparisonList: [], comparisonSummary: null }),
+  
+  setComparisonSummary: (summary) => set({ comparisonSummary: summary }),
+  setComparingLoading: (loading) => set({ isComparingLoading: loading }),
+  
+  // API actions
+  fetchProducts: async () => {
+    const state = get();
+    set({ isLoading: true, error: null });
+    
+    try {
+      const params = new URLSearchParams();
+      
+      if (state.filters.category) params.set('category', state.filters.category);
+      if (state.filters.brands?.length) params.set('brands', state.filters.brands.join(','));
+      if (state.filters.minPrice !== undefined) params.set('minPrice', state.filters.minPrice.toString());
+      if (state.filters.maxPrice !== undefined) params.set('maxPrice', state.filters.maxPrice.toString());
+      if (state.filters.sortBy) params.set('sortBy', state.filters.sortBy);
+      params.set('page', state.currentPage.toString());
+      params.set('limit', '20');
+      
+      const response = await fetch(`/api/products?${params.toString()}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      
+      const data = await response.json();
+      set({ 
+        products: data.products,
+        totalPages: data.pagination.totalPages,
+        totalCount: data.pagination.totalCount,
+        currentPage: data.pagination.page,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch products',
+        isLoading: false,
+      });
+    }
+  },
+  
+  fetchProduct: async (id) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const response = await fetch(`/api/products/${id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch product');
+      }
+      
+      const data = await response.json();
+      set({ 
+        currentProduct: data.product,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch product',
+        isLoading: false,
+      });
+    }
+  },
+  
+  parseSearchQuery: async (query) => {
+    set({ isLoading: true, error: null });
+    
+    try {
+      const response = await fetch('/api/ai/parse-query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to parse search query');
+      }
+      
+      const data = await response.json();
+      
+      // Apply the parsed filters
+      const newFilters: ProductFilters = {};
+      if (data.parsedFilters.category) newFilters.category = data.parsedFilters.category;
+      if (data.parsedFilters.brands) newFilters.brands = data.parsedFilters.brands;
+      if (data.parsedFilters.minPrice) newFilters.minPrice = data.parsedFilters.minPrice;
+      if (data.parsedFilters.maxPrice) newFilters.maxPrice = data.parsedFilters.maxPrice;
+      
+      set(state => ({
+        filters: { ...state.filters, ...newFilters },
+        currentPage: 1,
+        searchQuery: query,
+      }));
+      
+      // Fetch products with new filters
+      await get().fetchProducts();
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to parse search query',
+        isLoading: false,
+      });
+    }
+  },
+  
+  fetchComparisonSummary: async () => {
+    const state = get();
+    if (state.comparisonList.length < 2) return;
+    
+    set({ isComparingLoading: true });
+    
+    try {
+      const productIds = state.comparisonList.map(p => p.id);
+      const response = await fetch('/api/ai/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productIds }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate comparison');
+      }
+      
+      const data = await response.json();
+      set({ 
+        comparisonSummary: data.comparison,
+        isComparingLoading: false,
+      });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to generate comparison',
+        isComparingLoading: false,
+      });
+    }
+  },
+}));
