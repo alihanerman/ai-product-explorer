@@ -1,0 +1,58 @@
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+ 
+}
+
+generator client {
+  provider = "prisma-client-js"
+  
+
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  category    String
+  brand       String
+  price       Float
+  rating      Float
+  weight_kg   Float
+  cpu         String
+  ram_gb      Int
+  storage_gb  Int
+  screen_inch Float
+  battery_wh  Int
+  image_url   String //  data will be come from Vercel Blob 
+
+  favoritedBy Favorite[]
+
+  @@index([category])
+  @@index([brand])
+  @@index([price])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String   // Hashed
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites Favorite[]
+}
+
+model Favorite {
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  createdAt DateTime @default(now())
+
+  @@id([userId, productId])
+}
