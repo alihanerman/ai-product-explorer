@@ -20,7 +20,7 @@ export default function FavoritesPage() {
     checkAuth();
   }, [checkAuth]);
 
-  // Ürünleri sırala
+  // Sort products
   const sortProducts = useCallback(
     (products: Product[], sortType: string): Product[] => {
       const sorted = [...products];
@@ -51,7 +51,7 @@ export default function FavoritesPage() {
         setIsLoading(true);
         setError(null);
 
-        // Favorite ürünlerin detaylarını çek
+        // Fetch favorite product details
         const response = await fetch("/api/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -63,11 +63,11 @@ export default function FavoritesPage() {
           const sortedProducts = sortProducts(data.products || [], sortBy);
           setFavoriteProducts(sortedProducts);
         } else {
-          setError("Favori ürünler yüklenirken bir hata oluştu");
+          setError("An error occurred while loading favorite products");
         }
       } catch (error) {
         console.error("Failed to fetch favorite products:", error);
-        setError("Favori ürünler yüklenirken bir hata oluştu");
+        setError("An error occurred while loading favorite products");
       } finally {
         setIsLoading(false);
       }
@@ -76,7 +76,7 @@ export default function FavoritesPage() {
     fetchFavoriteProducts();
   }, [user, favoriteProductIds, sortBy, sortProducts]);
 
-  // SortBy değiştiğinde mevcut ürünleri yeniden sırala
+  // Re-sort existing products when sortBy changes
   useEffect(() => {
     if (favoriteProducts.length > 0) {
       const sortedProducts = sortProducts(favoriteProducts, sortBy);
@@ -84,22 +84,22 @@ export default function FavoritesPage() {
     }
   }, [sortBy, favoriteProducts, sortProducts]);
 
-  // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
+  // Redirect to login page if user is not logged in
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-4">Favoriler</h1>
+            <h1 className="text-3xl font-bold mb-4">Favorites</h1>
             <p className="text-muted-foreground mb-6">
-              Favori ürünlerinizi görmek için giriş yapmanız gerekmektedir.
+              You need to log in to view your favorite products.
             </p>
             <Link
               href="/login"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
-              Giriş Yap
+              Log In
             </Link>
           </div>
         </main>
@@ -111,11 +111,13 @@ export default function FavoritesPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Favori Ürünleriniz</h1>
-          <p className="text-muted-foreground">
-            Beğendiğiniz ürünleri burada bulabilirsiniz
+      <main className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
+            Your Favorite Products
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Find the products you liked here
           </p>
         </div>
 
@@ -130,7 +132,7 @@ export default function FavoritesPage() {
               onClick={() => window.location.reload()}
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
-              Tekrar Dene
+              Try Again
             </button>
           </div>
         ) : favoriteProducts.length === 0 ? (
@@ -151,28 +153,28 @@ export default function FavoritesPage() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              Henüz favori ürününüz yok
+              You don't have any favorite products yet
             </h3>
             <p className="text-muted-foreground mb-6">
-              Ürünleri beğenmek için kalp ikonuna tıklayın
+              Click the heart icon to like products
             </p>
             <Link
               href="/"
               className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
             >
-              Ürünleri Keşfet
+              Explore Products
             </Link>
           </div>
         ) : (
           <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
               <p className="text-sm text-muted-foreground">
-                {favoriteProducts.length} favori ürün bulundu
+                {favoriteProducts.length} favorite products found
               </p>
 
               <div className="flex items-center gap-2">
                 <label htmlFor="sort-select" className="text-sm font-medium">
-                  Sırala:
+                  Sort:
                 </label>
                 <select
                   id="sort-select"
@@ -180,17 +182,15 @@ export default function FavoritesPage() {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="text-sm border border-border rounded-md px-3 py-1 bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="name-asc">İsim (A-Z)</option>
-                  <option value="price-asc">Fiyat (Düşük-Yüksek)</option>
-                  <option value="price-desc">Fiyat (Yüksek-Düşük)</option>
-                  <option value="rating-desc">
-                    Değerlendirme (Yüksek-Düşük)
-                  </option>
+                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="price-asc">Price (Low-High)</option>
+                  <option value="price-desc">Price (High-Low)</option>
+                  <option value="rating-desc">Rating (High-Low)</option>
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {favoriteProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

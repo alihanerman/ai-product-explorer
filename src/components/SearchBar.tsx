@@ -23,7 +23,10 @@ export function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 w-full max-w-2xl">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col sm:flex-row gap-2 w-full max-w-2xl"
+    >
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
         <Input
@@ -31,10 +34,15 @@ export function SearchBar() {
           placeholder="Try: 'Apple laptops under $1500' or 'phones with 16GB RAM'"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="pl-10"
+          className="pl-10 text-sm sm:text-base"
         />
       </div>
-      <Button type="submit" isLoading={isLoading} disabled={!query.trim()}>
+      <Button
+        type="submit"
+        isLoading={isLoading}
+        disabled={!query.trim()}
+        className="w-full sm:w-auto px-6"
+      >
         Search
       </Button>
     </form>

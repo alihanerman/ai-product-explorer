@@ -136,18 +136,18 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
         {/* Breadcrumb */}
         <Link
           href="/"
-          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6"
+          className="inline-flex items-center text-sm sm:text-base text-muted-foreground hover:text-foreground mb-4 sm:mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Products
         </Link>
 
         {/* Product Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-6 sm:mb-8">
           {/* Product Image */}
           <div className="aspect-square relative overflow-hidden rounded-lg border">
             <Image
@@ -160,10 +160,10 @@ export default function ProductDetailPage() {
           </div>
 
           {/* Product Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm text-muted-foreground capitalize bg-muted px-2 py-1 rounded">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                <span className="text-xs sm:text-sm text-muted-foreground capitalize bg-muted px-2 py-1 rounded w-fit">
                   {product.category}
                 </span>
                 <div className="flex items-center gap-1">
@@ -172,37 +172,50 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-              <p className="text-xl text-muted-foreground mb-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+                {product.name}
+              </h1>
+              <p className="text-lg sm:text-xl text-muted-foreground mb-4">
                 {product.brand}
               </p>
 
-              <div className="text-4xl font-bold text-primary mb-6">
+              <div className="text-3xl sm:text-4xl font-bold text-primary mb-4 sm:mb-6">
                 ${product.price.toLocaleString()}
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               {user && (
                 <Button
                   variant={isFavorited ? "destructive" : "outline"}
                   onClick={handleToggleFavorite}
                   isLoading={isTogglingFavorite}
+                  className="w-full sm:w-auto text-sm"
                 >
                   <Heart
                     className={`h-4 w-4 mr-2 ${
                       isFavorited ? "fill-current" : ""
                     }`}
                   />
-                  {isFavorited ? "Remove from Favorites" : "Add to Favorites"}
+                  <span className="hidden sm:inline">
+                    {isFavorited ? "Remove from Favorites" : "Add to Favorites"}
+                  </span>
+                  <span className="sm:hidden">
+                    {isFavorited ? "Remove" : "Favorite"}
+                  </span>
                 </Button>
               )}
 
               {canAddToComparison && (
-                <Button variant="outline" onClick={handleAddToComparison}>
+                <Button
+                  variant="outline"
+                  onClick={handleAddToComparison}
+                  className="w-full sm:w-auto text-sm"
+                >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add to Compare
+                  <span className="hidden sm:inline">Add to Compare</span>
+                  <span className="sm:hidden">Compare</span>
                 </Button>
               )}
             </div>
@@ -213,19 +226,21 @@ export default function ProductDetailPage() {
                 <CardTitle>Specifications</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center gap-3">
-                    <Cpu className="h-5 w-5 text-muted-foreground" />
+                    <Cpu className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Processor</p>
+                      <p className="text-sm text-primary font-medium">
+                        Processor
+                      </p>
                       <p className="font-medium">{product.cpu}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <HardDrive className="h-5 w-5 text-muted-foreground" />
+                    <HardDrive className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-primary font-medium">
                         Memory & Storage
                       </p>
                       <p className="font-medium">
@@ -235,9 +250,11 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Monitor className="h-5 w-5 text-muted-foreground" />
+                    <Monitor className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Display</p>
+                      <p className="text-sm text-primary font-medium">
+                        Display
+                      </p>
                       <p className="font-medium">
                         {product.screen_inch}&quot; Screen
                       </p>
@@ -245,18 +262,20 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Weight className="h-5 w-5 text-muted-foreground" />
+                    <Weight className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Weight</p>
+                      <p className="text-sm text-primary font-medium">Weight</p>
                       <p className="font-medium">{product.weight_kg}kg</p>
                     </div>
                   </div>
 
                   {product.battery_wh > 0 && (
                     <div className="flex items-center gap-3 col-span-2">
-                      <Battery className="h-5 w-5 text-muted-foreground" />
+                      <Battery className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Battery</p>
+                        <p className="text-sm text-primary font-medium">
+                          Battery
+                        </p>
                         <p className="font-medium">{product.battery_wh}Wh</p>
                       </div>
                     </div>

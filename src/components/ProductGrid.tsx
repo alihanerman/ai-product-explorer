@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ProductCard } from '@/components/ProductCard';
-import { Button } from '@/components/ui/Button';
-import { useProductStore } from '@/lib/stores/productStore';
+import { useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ProductCard } from "@/components/ProductCard";
+import { Button } from "@/components/ui/Button";
+import { useProductStore } from "@/lib/stores/productStore";
 
 export function ProductGrid() {
   const {
@@ -24,13 +24,13 @@ export function ProductGrid() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="flex-1 p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
               key={index}
@@ -51,7 +51,7 @@ export function ProductGrid() {
 
   if (error) {
     return (
-      <div className="flex-1 p-6 flex items-center justify-center">
+      <div className="flex-1 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">Error Loading Products</h3>
           <p className="text-muted-foreground mb-4">{error}</p>
@@ -63,7 +63,7 @@ export function ProductGrid() {
 
   if (products.length === 0) {
     return (
-      <div className="flex-1 p-6 flex items-center justify-center">
+      <div className="flex-1 p-4 sm:p-6 flex items-center justify-center">
         <div className="text-center">
           <h3 className="text-lg font-semibold mb-2">No Products Found</h3>
           <p className="text-muted-foreground">
@@ -75,17 +75,17 @@ export function ProductGrid() {
   }
 
   return (
-    <div className="flex-1 p-6">
+    <div className="flex-1 p-4 sm:p-6">
       {/* Results Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Products</h2>
-        <p className="text-muted-foreground">
+      <div className="mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-2">Products</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Showing {products.length} of {totalCount} products
         </p>
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
@@ -93,18 +93,19 @@ export function ProductGrid() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
           <Button
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage <= 1}
+            className="w-full sm:w-auto"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
           </Button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNum;
               if (totalPages <= 5) {
@@ -120,10 +121,10 @@ export function ProductGrid() {
               return (
                 <Button
                   key={pageNum}
-                  variant={currentPage === pageNum ? 'primary' : 'outline'}
+                  variant={currentPage === pageNum ? "primary" : "outline"}
                   size="sm"
                   onClick={() => handlePageChange(pageNum)}
-                  className="w-10"
+                  className="w-8 sm:w-10 text-xs sm:text-sm"
                 >
                   {pageNum}
                 </Button>
@@ -136,6 +137,7 @@ export function ProductGrid() {
             size="sm"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
+            className="w-full sm:w-auto"
           >
             Next
             <ChevronRight className="h-4 w-4 ml-1" />

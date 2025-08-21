@@ -58,12 +58,15 @@ export function HomeContent() {
           aria-labelledby="search-heading"
           className="border-b bg-muted/30"
         >
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center mb-6">
-              <h1 id="search-heading" className="text-4xl font-bold mb-2">
+          <div className="container mx-auto px-4 py-6 sm:py-8">
+            <div className="text-center mb-4 sm:mb-6">
+              <h1
+                id="search-heading"
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2"
+              >
                 AI-Powered Product Explorer
               </h1>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground">
                 Discover, compare, and find the perfect electronic products with
                 AI assistance
               </p>
@@ -76,7 +79,7 @@ export function HomeContent() {
         </section>
 
         {/* Main Content */}
-        <div className="container mx-auto flex flex-col lg:flex-row">
+        <div className="container mx-auto flex flex-col lg:flex-row min-h-0">
           <FilterSidebar />
           <ProductGrid />
         </div>

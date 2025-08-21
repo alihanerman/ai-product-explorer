@@ -92,7 +92,7 @@ export function FilterSidebar() {
   const hasActiveFilters = Object.keys(filters).length > 0;
 
   return (
-    <aside className="w-full lg:w-80 lg:flex-shrink-0 bg-card border-b lg:border-b-0 lg:border-r p-6 space-y-6">
+    <aside className="w-full lg:w-80 lg:flex-shrink-0 bg-card border-b lg:border-b-0 lg:border-r p-4 lg:p-6 space-y-4 lg:space-y-6 max-h-screen lg:overflow-y-auto">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Filters</h2>
         {hasActiveFilters && (

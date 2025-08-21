@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { X, ChevronUp, ChevronDown, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { useProductStore } from '@/lib/stores/productStore';
+import { useState } from "react";
+import Image from "next/image";
+import { X, ChevronUp, ChevronDown, Zap } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { useProductStore } from "@/lib/stores/productStore";
 
 export function ComparisonTray() {
   const {
@@ -16,7 +16,7 @@ export function ComparisonTray() {
     comparisonSummary,
     isComparingLoading,
   } = useProductStore();
-  
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   if (comparisonList.length === 0) return null;
@@ -31,50 +31,57 @@ export function ComparisonTray() {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
       {/* Tray Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-4">
-          <h3 className="font-semibold">
-            Compare Products ({comparisonList.length}/4)
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <h3 className="font-semibold text-sm sm:text-base">
+            Compare ({comparisonList.length}/4)
           </h3>
-          
+
           {comparisonList.length >= 2 && (
             <Button
               size="sm"
               onClick={handleGenerateComparison}
               isLoading={isComparingLoading}
+              className="text-xs sm:text-sm"
             >
-              <Zap className="h-4 w-4 mr-1" />
-              AI Compare
+              <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+              <span className="hidden sm:inline">AI </span>Compare
             </Button>
           )}
         </div>
-        
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
+            className="h-8 w-8 sm:h-9 sm:w-9"
           >
             {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" />
             ) : (
-              <ChevronUp className="h-4 w-4" />
+              <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
           </Button>
-          
-          <Button variant="ghost" size="sm" onClick={clearComparison}>
-            <X className="h-4 w-4" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearComparison}
+            className="h-8 w-8 sm:h-9 sm:w-9"
+          >
+            <X className="h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </div>
       </div>
 
       {/* Product List */}
-      <div className="p-4">
-        <div className="flex gap-4 overflow-x-auto">
+      <div className="p-3 sm:p-4">
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2">
           {comparisonList.map((product) => (
             <div
               key={product.id}
-              className="flex-shrink-0 w-48 bg-card rounded-lg border p-3"
+              className="flex-shrink-0 w-40 sm:w-48 bg-card rounded-lg border p-2 sm:p-3"
             >
               <div className="relative">
                 <Image
@@ -82,24 +89,24 @@ export function ComparisonTray() {
                   alt={product.name}
                   width={160}
                   height={120}
-                  className="w-full h-24 object-cover rounded"
+                  className="w-full h-20 sm:h-24 object-cover rounded"
                 />
                 <Button
-                  variant="destructive"
+                  variant="ghost"
                   size="sm"
                   onClick={() => removeFromComparison(product.id)}
-                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
-                >
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full bg-black/20 backdrop-blur-sm border border-white/20 text-white hover:bg-red-500 hover:border-red-400 transition-all duration-200"
+              >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
-              
+
               <div className="mt-2">
-                <h4 className="font-medium text-sm line-clamp-2">
+                <h4 className="font-medium text-xs sm:text-sm line-clamp-2">
                   {product.name}
                 </h4>
                 <p className="text-xs text-muted-foreground">{product.brand}</p>
-                <p className="text-sm font-semibold text-primary">
+                <p className="text-xs sm:text-sm font-semibold text-primary">
                   ${product.price.toLocaleString()}
                 </p>
               </div>
@@ -110,15 +117,17 @@ export function ComparisonTray() {
 
       {/* AI Comparison Results */}
       {isExpanded && comparisonSummary && (
-        <div className="border-t p-4 max-h-96 overflow-y-auto">
+        <div className="border-t p-3 sm:p-4 max-h-64 sm:max-h-96 overflow-y-auto">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">AI Comparison Analysis</CardTitle>
+            <CardHeader className="pb-2 sm:pb-4">
+              <CardTitle className="text-base sm:text-lg">
+                AI Comparison Analysis
+              </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               <div className="prose prose-sm max-w-none">
-                {comparisonSummary.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-2">
+                {comparisonSummary.split("\n").map((paragraph, index) => (
+                  <p key={index} className="mb-2 text-xs sm:text-sm">
                     {paragraph}
                   </p>
                 ))}
