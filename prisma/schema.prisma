@@ -47,3 +47,11 @@ model Favorite {
 
   @@id([userId, productId])
 }
+
+model AiLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  prompt    String   @db.Text
+  response  String   @db.Text
+  modelUsed String
+}
