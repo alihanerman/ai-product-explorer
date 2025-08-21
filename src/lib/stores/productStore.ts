@@ -59,6 +59,10 @@ export interface ProductState {
   fetchProduct: (id: string) => Promise<void>;
   parseSearchQuery: (query: string) => Promise<void>;
   fetchComparisonSummary: () => Promise<void>;
+
+  // URL actions
+  initializeFromURL: (searchParams: URLSearchParams) => void;
+  updateURL: () => void;
 }
 
 export const useProductStore = create<ProductState>((set, get) => ({
@@ -88,13 +92,20 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
   setCurrentProduct: (product) => set({ currentProduct: product }),
 
-  setFilters: (newFilters) =>
+  setFilters: (newFilters) => {
     set((state) => ({
       filters: { ...state.filters, ...newFilters },
       currentPage: 1, // Reset to first page when filters change
-    })),
+    }));
+    // URL'yi güncelle
+    setTimeout(() => get().updateURL(), 0);
+  },
 
-  setSearchQuery: (query) => set({ searchQuery: query }),
+  setSearchQuery: (query) => {
+    set({ searchQuery: query });
+    // URL'yi güncelle
+    setTimeout(() => get().updateURL(), 0);
+  },
   setCurrentPage: (page) => set({ currentPage: page }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
@@ -272,5 +283,63 @@ export const useProductStore = create<ProductState>((set, get) => ({
         isComparingLoading: false,
       });
     }
+  },
+
+  // URL actions
+  initializeFromURL: (searchParams: URLSearchParams) => {
+    const urlFilters: ProductFilters = {};
+    const urlSearchQuery = searchParams.get("q") || "";
+
+    if (searchParams.get("category")) {
+      urlFilters.category = searchParams.get("category")!;
+    }
+    if (searchParams.get("brands")) {
+      urlFilters.brands = searchParams.get("brands")!.split(",");
+    }
+    if (searchParams.get("minPrice")) {
+      urlFilters.minPrice = parseInt(searchParams.get("minPrice")!);
+    }
+    if (searchParams.get("maxPrice")) {
+      urlFilters.maxPrice = parseInt(searchParams.get("maxPrice")!);
+    }
+    if (searchParams.get("sortBy")) {
+      urlFilters.sortBy = searchParams.get(
+        "sortBy"
+      )! as ProductFilters["sortBy"];
+    }
+
+    set({
+      filters: urlFilters,
+      searchQuery: urlSearchQuery,
+    });
+  },
+
+  updateURL: () => {
+    if (typeof window === "undefined") return; // Server-side check
+
+    const state = get();
+    const params = new URLSearchParams();
+
+    if (state.searchQuery) {
+      params.set("q", state.searchQuery);
+    }
+    if (state.filters.category) {
+      params.set("category", state.filters.category);
+    }
+    if (state.filters.brands && state.filters.brands.length > 0) {
+      params.set("brands", state.filters.brands.join(","));
+    }
+    if (state.filters.minPrice !== undefined) {
+      params.set("minPrice", state.filters.minPrice.toString());
+    }
+    if (state.filters.maxPrice !== undefined) {
+      params.set("maxPrice", state.filters.maxPrice.toString());
+    }
+    if (state.filters.sortBy) {
+      params.set("sortBy", state.filters.sortBy);
+    }
+
+    const newURL = params.toString() ? `/?${params.toString()}` : "/";
+    window.history.replaceState({}, "", newURL);
   },
 }));

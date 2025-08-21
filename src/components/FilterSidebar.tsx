@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useProductStore } from "@/lib/stores/productStore";
+import { useProductStore, ProductFilters } from "@/lib/stores/productStore";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 const CATEGORIES = [
   { value: "phone", label: "Phones" },
@@ -28,7 +28,18 @@ const BRANDS = [
   "Razer",
 ];
 
-const SORT_OPTIONS = [
+// sortBy değerlerinin bir listesini oluşturarak tip kontrolü sağlıyoruz.
+const SORT_BY_VALUES = [
+  "name-asc",
+  "price-asc",
+  "price-desc",
+  "rating-desc",
+] as const;
+
+const SORT_OPTIONS: {
+  value: (typeof SORT_BY_VALUES)[number];
+  label: string;
+}[] = [
   { value: "name-asc", label: "Name (A-Z)" },
   { value: "price-asc", label: "Price (Low to High)" },
   { value: "price-desc", label: "Price (High to Low)" },
@@ -37,60 +48,51 @@ const SORT_OPTIONS = [
 
 export function FilterSidebar() {
   const { filters, setFilters, fetchProducts } = useProductStore();
-  const [localFilters, setLocalFilters] = useState(filters);
+  const debouncedFetch = useDebounce(fetchProducts, 500);
 
-  useEffect(() => {
-    setLocalFilters(filters);
-  }, [filters]);
+  const handleFilterChange = <K extends keyof ProductFilters>(
+    key: K,
+    value: ProductFilters[K]
+  ) => {
+    const newFilters = { ...filters };
 
-  const handleCategoryChange = (category: string) => {
-    const newCategory =
-      localFilters.category === category ? undefined : category;
-    setLocalFilters((prev) => ({ ...prev, category: newCategory }));
+    if (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      delete newFilters[key];
+    } else {
+      newFilters[key] = value;
+    }
+
+    setFilters(newFilters);
+
+    if (key !== "minPrice" && key !== "maxPrice") {
+      fetchProducts();
+    } else {
+      debouncedFetch();
+    }
   };
 
   const handleBrandToggle = (brand: string) => {
-    const currentBrands = localFilters.brands || [];
+    const currentBrands = filters.brands || [];
     const newBrands = currentBrands.includes(brand)
       ? currentBrands.filter((b) => b !== brand)
       : [...currentBrands, brand];
-
-    setLocalFilters((prev) => ({
-      ...prev,
-      brands: newBrands.length > 0 ? newBrands : undefined,
-    }));
-  };
-
-  const handlePriceChange = (field: "minPrice" | "maxPrice", value: string) => {
-    const numValue = value === "" ? undefined : parseFloat(value);
-    setLocalFilters((prev) => ({ ...prev, [field]: numValue }));
-  };
-
-  const handleSortChange = (sortBy: string) => {
-    setLocalFilters((prev) => ({
-      ...prev,
-      sortBy: sortBy as "price-asc" | "price-desc" | "rating-desc" | "name-asc",
-    }));
-  };
-
-  const applyFilters = () => {
-    setFilters(localFilters);
-    fetchProducts();
+    handleFilterChange("brands", newBrands.length > 0 ? newBrands : undefined);
   };
 
   const clearFilters = () => {
-    const clearedFilters = {};
-    setLocalFilters(clearedFilters);
-    setFilters(clearedFilters);
+    setFilters({});
     fetchProducts();
   };
 
-  const hasActiveFilters = Object.keys(localFilters).some(
-    (key) => localFilters[key as keyof typeof localFilters] !== undefined
-  );
+  const hasActiveFilters = Object.keys(filters).length > 0;
 
   return (
-    <div className="w-80 bg-card border-r p-6 space-y-6">
+    <aside className="w-full lg:w-80 lg:flex-shrink-0 bg-card border-b lg:border-b-0 lg:border-r p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Filters</h2>
         {hasActiveFilters && (
@@ -113,9 +115,16 @@ export function FilterSidebar() {
               <input
                 type="radio"
                 name="category"
-                checked={localFilters.category === category.value}
-                onChange={() => handleCategoryChange(category.value)}
-                className="rounded border-gray-300"
+                checked={filters.category === category.value}
+                onChange={() =>
+                  handleFilterChange(
+                    "category",
+                    filters.category === category.value
+                      ? undefined
+                      : category.value
+                  )
+                }
+                className="rounded border-gray-300 text-primary focus:ring-primary"
               />
               <span className="text-sm">{category.label}</span>
             </label>
@@ -134,9 +143,9 @@ export function FilterSidebar() {
             >
               <input
                 type="checkbox"
-                checked={localFilters.brands?.includes(brand) || false}
+                checked={filters.brands?.includes(brand) || false}
                 onChange={() => handleBrandToggle(brand)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 text-primary focus:ring-primary"
               />
               <span className="text-sm">{brand}</span>
             </label>
@@ -151,14 +160,26 @@ export function FilterSidebar() {
           <Input
             type="number"
             placeholder="Min price"
-            value={localFilters.minPrice || ""}
-            onChange={(e) => handlePriceChange("minPrice", e.target.value)}
+            value={filters.minPrice ?? ""}
+            onChange={(e) =>
+              handleFilterChange(
+                "minPrice",
+                e.target.value === "" ? undefined : parseFloat(e.target.value)
+              )
+            }
+            min="0"
           />
           <Input
             type="number"
             placeholder="Max price"
-            value={localFilters.maxPrice || ""}
-            onChange={(e) => handlePriceChange("maxPrice", e.target.value)}
+            value={filters.maxPrice ?? ""}
+            onChange={(e) =>
+              handleFilterChange(
+                "maxPrice",
+                e.target.value === "" ? undefined : parseFloat(e.target.value)
+              )
+            }
+            min="0"
           />
         </div>
       </div>
@@ -167,8 +188,14 @@ export function FilterSidebar() {
       <div className="space-y-3">
         <h3 className="font-medium">Sort By</h3>
         <select
-          value={localFilters.sortBy || ""}
-          onChange={(e) => handleSortChange(e.target.value)}
+          value={filters.sortBy || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            // Gelen değerin beklenen 'sortBy' değerlerinden biri olup olmadığını kontrol ediyoruz.
+            // Bu, 'as any' kullanmaktan daha güvenli bir yöntemdir.
+            const sortByValue = SORT_BY_VALUES.find((v) => v === value);
+            handleFilterChange("sortBy", sortByValue);
+          }}
           className="w-full p-2 border border-input rounded-md bg-background"
         >
           <option value="">Default</option>
@@ -179,11 +206,6 @@ export function FilterSidebar() {
           ))}
         </select>
       </div>
-
-      {/* Apply Filters Button */}
-      <Button onClick={applyFilters} className="w-full">
-        Apply Filters
-      </Button>
-    </div>
+    </aside>
   );
 }

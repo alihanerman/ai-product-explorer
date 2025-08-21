@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ProductFiltersSchema } from "@/lib/validations";
 import { Prisma } from "@prisma/client";
+import { z } from "zod";
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,6 +95,35 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching products:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
+  }
+}
+
+const ProductIdsSchema = z.object({
+  productIds: z.array(z.string()),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { productIds } = ProductIdsSchema.parse(body);
+
+    // Fetch products by IDs
+    const products = await prisma.product.findMany({
+      where: {
+        id: { in: productIds },
+      },
+      orderBy: { name: "asc" },
+    });
+
+    return NextResponse.json({
+      products,
+    });
+  } catch (error) {
+    console.error("Error fetching products by IDs:", error);
     return NextResponse.json(
       { error: "Failed to fetch products" },
       { status: 500 }

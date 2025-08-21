@@ -1,14 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { useProductStore } from '@/lib/stores/productStore';
+import { useState, useEffect } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { useProductStore } from "@/lib/stores/productStore";
 
 export function SearchBar() {
-  const [query, setQuery] = useState('');
-  const { parseSearchQuery, isLoading } = useProductStore();
+  const [query, setQuery] = useState("");
+  const { parseSearchQuery, isLoading, searchQuery } = useProductStore();
+
+  // Store'daki searchQuery ile local state'i senkronize et
+  useEffect(() => {
+    setQuery(searchQuery);
+  }, [searchQuery]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

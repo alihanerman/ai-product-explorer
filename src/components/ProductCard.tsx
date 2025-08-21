@@ -61,12 +61,13 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="group hover:shadow-lg transition-shadow duration-200">
       <Link href={`/products/${product.id}`}>
-        <div className="aspect-square relative overflow-hidden rounded-t-lg">
+        <div className="aspect-square relative overflow-hidden rounded-t-lg bg-muted">
           <Image
             src={product.image_url}
             alt={product.name}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-200"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-contain p-4 group-hover:scale-105 transition-transform duration-200"
           />
 
           {/* Action buttons overlay */}
