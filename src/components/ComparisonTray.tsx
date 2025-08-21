@@ -4,8 +4,9 @@ import { useState } from "react";
 import Image from "next/image";
 import { X, ChevronUp, ChevronDown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+
 import { useProductStore } from "@/lib/stores/productStore";
+import { EnhancedComparisonView } from "@/components/EnhancedComparisonView";
 
 export function ComparisonTray() {
   const {
@@ -21,9 +22,14 @@ export function ComparisonTray() {
 
   if (comparisonList.length === 0) return null;
 
-  const handleGenerateComparison = async () => {
+  const handleGenerateComparison = async (userPreferences?: {
+    budget?: "low" | "medium" | "high";
+    screenSize?: "compact" | "standard" | "large";
+    usage?: "basic" | "work" | "gaming" | "creative";
+    mobility?: "desktop" | "portable" | "ultraportable";
+  }) => {
     if (comparisonList.length >= 2) {
-      await fetchComparisonSummary();
+      await fetchComparisonSummary(userPreferences);
       setIsExpanded(true);
     }
   };
@@ -40,7 +46,7 @@ export function ComparisonTray() {
           {comparisonList.length >= 2 && (
             <Button
               size="sm"
-              onClick={handleGenerateComparison}
+              onClick={() => handleGenerateComparison()}
               isLoading={isComparingLoading}
               className="text-xs sm:text-sm"
             >
@@ -96,7 +102,7 @@ export function ComparisonTray() {
                   size="sm"
                   onClick={() => removeFromComparison(product.id)}
                   className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full bg-black/20 backdrop-blur-sm border border-white/20 text-white hover:bg-red-500 hover:border-red-400 transition-all duration-200"
-              >
+                >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
@@ -115,25 +121,14 @@ export function ComparisonTray() {
         </div>
       </div>
 
-      {/* AI Comparison Results */}
-      {isExpanded && comparisonSummary && (
-        <div className="border-t p-3 sm:p-4 max-h-64 sm:max-h-96 overflow-y-auto">
-          <Card>
-            <CardHeader className="pb-2 sm:pb-4">
-              <CardTitle className="text-base sm:text-lg">
-                AI Comparison Analysis
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="prose prose-sm max-w-none">
-                {comparisonSummary.split("\n").map((paragraph, index) => (
-                  <p key={index} className="mb-2 text-xs sm:text-sm">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+      {/* Enhanced Comparison Results */}
+      {isExpanded && comparisonList.length >= 2 && (
+        <div className="border-t p-3 sm:p-4 max-h-[70vh] overflow-y-auto">
+          <EnhancedComparisonView
+            products={comparisonList}
+            comparisonSummary={comparisonSummary}
+            onRegenerateWithPreferences={handleGenerateComparison}
+          />
         </div>
       )}
     </div>

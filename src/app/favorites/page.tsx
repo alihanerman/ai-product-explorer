@@ -153,7 +153,7 @@ export default function FavoritesPage() {
               </svg>
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              You don't have any favorite products yet
+              You don&apos;t have any favorite products yet
             </h3>
             <p className="text-muted-foreground mb-6">
               Click the heart icon to like products

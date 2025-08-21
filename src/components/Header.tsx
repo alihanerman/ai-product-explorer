@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/lib/stores/authStore";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogsModal } from "@/components/LogsModal";
+import { FileText } from "lucide-react";
 
 export function Header() {
   const { user, logout, checkAuth, isLoading } = useAuthStore();
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -41,6 +44,15 @@ export function Header() {
                 Favorites
               </Link>
             )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsLogsModalOpen(true)}
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
+              <FileText className="h-4 w-4 mr-1" />
+              Logs
+            </Button>
           </div>
 
           {user ? (
@@ -72,6 +84,11 @@ export function Header() {
           <ThemeToggle />
         </nav>
       </div>
+      
+      <LogsModal 
+        isOpen={isLogsModalOpen} 
+        onClose={() => setIsLogsModalOpen(false)} 
+      />
     </header>
   );
 }

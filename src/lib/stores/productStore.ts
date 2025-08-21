@@ -58,7 +58,12 @@ export interface ProductState {
   fetchProducts: () => Promise<void>;
   fetchProduct: (id: string) => Promise<void>;
   parseSearchQuery: (query: string) => Promise<void>;
-  fetchComparisonSummary: () => Promise<void>;
+  fetchComparisonSummary: (userPreferences?: {
+    budget?: "low" | "medium" | "high";
+    screenSize?: "compact" | "standard" | "large";
+    usage?: "basic" | "work" | "gaming" | "creative";
+    mobility?: "desktop" | "portable" | "ultraportable";
+  }) => Promise<void>;
 
   // URL actions
   initializeFromURL: (searchParams: URLSearchParams) => void;
@@ -251,7 +256,12 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  fetchComparisonSummary: async () => {
+  fetchComparisonSummary: async (userPreferences?: {
+    budget?: "low" | "medium" | "high";
+    screenSize?: "compact" | "standard" | "large";
+    usage?: "basic" | "work" | "gaming" | "creative";
+    mobility?: "desktop" | "portable" | "ultraportable";
+  }) => {
     const state = get();
     if (state.comparisonList.length < 2) return;
 
@@ -262,7 +272,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
       const response = await fetch("/api/ai/compare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productIds }),
+        body: JSON.stringify({
+          productIds,
+          userPreferences,
+        }),
       });
 
       if (!response.ok) {
