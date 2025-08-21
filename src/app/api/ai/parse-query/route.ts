@@ -42,7 +42,7 @@ Parse this query and return only the JSON:
           "X-Title": "AI Product Explorer",
         },
         body: JSON.stringify({
-          model: "meta-llama/llama-3.2-3b-instruct:free",
+          model: "microsoft/phi-3-mini-128k-instruct:free", // Use alternative model as default
           messages: [
             {
               role: "user",
