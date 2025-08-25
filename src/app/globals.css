@@ -79,60 +79,60 @@
 }
 
 .dark {
-  /* Ana arkaplan - koyu gri/siyah */
-  --background: oklch(0.1 0.02 230);
-  --foreground: oklch(0.98 0.01 60);
+  /* Ana arkaplan - daha yumuşak koyu gri */
+  --background: oklch(0.08 0.01 240);
+  --foreground: oklch(0.95 0.005 250);
 
-  /* Card/konteyner renkler - hafif sarımsı warm ton */
-  --card: oklch(0.15 0.03 45);
-  --card-foreground: oklch(0.95 0.02 50);
+  /* Card/konteyner renkler - yumuşak gri ton */
+  --card: oklch(0.12 0.015 245);
+  --card-foreground: oklch(0.92 0.008 250);
 
   /* Popover */
-  --popover: oklch(0.15 0.03 45);
-  --popover-foreground: oklch(0.95 0.02 50);
+  --popover: oklch(0.12 0.015 245);
+  --popover-foreground: oklch(0.92 0.008 250);
 
-  /* Primary - parlak turuncu/sarı */
-  --primary: oklch(0.75 0.15 60);
-  --primary-foreground: oklch(0.1 0.02 230);
+  /* Primary - daha yumuşak mavi ton */
+  --primary: oklch(0.65 0.12 250);
+  --primary-foreground: oklch(0.08 0.01 240);
 
-  /* Secondary - yumuşak amber */
-  --secondary: oklch(0.25 0.06 50);
-  --secondary-foreground: oklch(0.95 0.02 50);
+  /* Secondary - yumuşak gri */
+  --secondary: oklch(0.18 0.02 245);
+  --secondary-foreground: oklch(0.92 0.008 250);
 
-  /* Muted - orta ton */
-  --muted: oklch(0.25 0.06 50);
-  --muted-foreground: oklch(0.7 0.05 55);
+  /* Muted - daha yumuşak ton */
+  --muted: oklch(0.18 0.02 245);
+  --muted-foreground: oklch(0.65 0.03 250);
 
-  /* Accent - vurgulu turuncu */
-  --accent: oklch(0.3 0.08 55);
-  --accent-foreground: oklch(0.95 0.02 50);
+  /* Accent - yumuşak vurgu */
+  --accent: oklch(0.22 0.025 245);
+  --accent-foreground: oklch(0.92 0.008 250);
 
-  /* Destructive - kırmızı */
-  --destructive: oklch(0.65 0.2 25);
+  /* Destructive - daha yumuşak kırmızı */
+  --destructive: oklch(0.6 0.15 25);
 
-  /* Border ve input - yumuşak turuncu tint */
-  --border: oklch(0.3 0.04 50);
-  --input: oklch(0.2 0.04 50);
+  /* Border ve input - yumuşak gri */
+  --border: oklch(0.25 0.02 245);
+  --input: oklch(0.15 0.02 245);
 
-  /* Ring - odak halkası */
-  --ring: oklch(0.7 0.12 58);
+  /* Ring - yumuşak odak halkası */
+  --ring: oklch(0.65 0.08 250);
 
-  /* Chart colors - warm palette */
-  --chart-1: oklch(0.65 0.15 60); /* Sarı */
-  --chart-2: oklch(0.7 0.12 40); /* Turuncu */
-  --chart-3: oklch(0.6 0.18 25); /* Kırmızımsı turuncu */
-  --chart-4: oklch(0.75 0.1 80); /* Açık sarı */
-  --chart-5: oklch(0.55 0.2 35); /* Koyu turuncu */
+  /* Chart colors - smooth palette */
+  --chart-1: oklch(0.65 0.12 250); /* Mavi */
+  --chart-2: oklch(0.7 0.1 200); /* Açık mavi */
+  --chart-3: oklch(0.6 0.12 280); /* Mor */
+  --chart-4: oklch(0.75 0.08 220); /* Açık mor */
+  --chart-5: oklch(0.55 0.15 260); /* Koyu mavi */
 
   /* Sidebar */
-  --sidebar: oklch(0.15 0.03 45);
-  --sidebar-foreground: oklch(0.95 0.02 50);
-  --sidebar-primary: oklch(0.65 0.15 60);
-  --sidebar-primary-foreground: oklch(0.1 0.02 230);
-  --sidebar-accent: oklch(0.3 0.08 55);
-  --sidebar-accent-foreground: oklch(0.95 0.02 50);
-  --sidebar-border: oklch(0.3 0.04 50);
-  --sidebar-ring: oklch(0.7 0.12 58);
+  --sidebar: oklch(0.12 0.015 245);
+  --sidebar-foreground: oklch(0.92 0.008 250);
+  --sidebar-primary: oklch(0.65 0.12 250);
+  --sidebar-primary-foreground: oklch(0.08 0.01 240);
+  --sidebar-accent: oklch(0.22 0.025 245);
+  --sidebar-accent-foreground: oklch(0.92 0.008 250);
+  --sidebar-border: oklch(0.25 0.02 245);
+  --sidebar-ring: oklch(0.65 0.08 250);
 }
 
 @layer base {
@@ -143,5 +143,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-
