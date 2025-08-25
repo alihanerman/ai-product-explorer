@@ -61,7 +61,8 @@ interface FilterSidebarProps {
 }
 
 export function FilterSidebar({ isOpen = true, onToggle }: FilterSidebarProps) {
-  const { filters, setFilters, fetchProducts } = useProductStore();
+  const { filters, setFilters, fetchProducts, resetSearchAndFilters } =
+    useProductStore();
   const { user } = useAuthStore();
   const debouncedFetch = useDebounceCallback(fetchProducts, 500);
   const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
@@ -137,9 +138,12 @@ export function FilterSidebar({ isOpen = true, onToggle }: FilterSidebarProps) {
   };
 
   const clearFilters = () => {
-    setFilters({});
+   
+    // Use the store's resetSearchAndFilters method to properly clear everything
+    resetSearchAndFilters();
+    // Reset price range slider
     setPriceRange([MIN_PRICE, MAX_PRICE]);
-    fetchProducts();
+   
   };
 
   const hasActiveFilters = Object.keys(filters).length > 0;
@@ -232,37 +236,37 @@ export function FilterSidebar({ isOpen = true, onToggle }: FilterSidebarProps) {
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={clearFilters}
-              disabled={!hasActiveFilters}
-              className={`${
-                !hasActiveFilters ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              size="icon"
+              onClick={() => {
+                
+                clearFilters();
+              }}
+              className="!bg-transparent !border-0 !text-red-500 hover:!text-red-600 hover:!bg-red-50 dark:!text-red-400 dark:hover:!text-red-300 dark:hover:!bg-red-950/20"
+              title="Clear all filters"
             >
-              <X className="h-4 w-4 mr-1" />
-              Clear
+              <X className="h-5 w-5" />
             </Button>
             {/* Desktop toggle button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onToggle}
-              className="hidden lg:flex h-8 w-8 p-0"
+              className="hidden lg:flex"
             >
               {isOpen ? (
-                <PanelLeftClose className="h-4 w-4" />
+                <PanelLeftClose className="h-5 w-5" />
               ) : (
-                <PanelLeftOpen className="h-4 w-4" />
+                <PanelLeftOpen className="h-5 w-5" />
               )}
             </Button>
             {/* Mobile close button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onToggle}
-              className="lg:hidden h-8 w-8 p-0"
+              className="lg:hidden"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -273,6 +277,16 @@ export function FilterSidebar({ isOpen = true, onToggle }: FilterSidebarProps) {
           <div className="space-y-3">
             <h3 className="font-medium">Category</h3>
             <div className="space-y-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="category"
+                  checked={!filters.category}
+                  onChange={() => handleFilterChange("category", undefined)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <span className="text-sm">All Categories</span>
+              </label>
               {CATEGORIES.map((category) => (
                 <label
                   key={category.value}
