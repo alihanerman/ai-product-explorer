@@ -15,8 +15,11 @@ export function HomeContent() {
   const { setFavoriteProductIds, initializeFromURL, fetchProducts } =
     useProductStore();
 
-  // State for sidebar toggling
-  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(true);
+  // State for sidebar toggling (closed by default on mobile, open on desktop)
+  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    return window.matchMedia("(min-width: 1024px)").matches; // lg breakpoint
+  });
   const [isComparisonTrayOpen, setIsComparisonTrayOpen] = useState(true);
 
   // Sadece ilk yükleme sırasında URL'den parametreleri oku
