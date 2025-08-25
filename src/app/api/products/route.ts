@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
       minPrice: searchParams.get("minPrice") || undefined,
       maxPrice: searchParams.get("maxPrice") || undefined,
       sortBy: searchParams.get("sortBy") || undefined,
+      sortDirection: searchParams.get("sortDirection") || undefined,
       page: searchParams.get("page") || "1",
       limit: searchParams.get("limit") || "20",
       search: searchParams.get("search") || undefined,
@@ -58,23 +59,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    let orderBy: Prisma.ProductOrderByWithRelationInput = { name: "asc" }; // default
+    let orderBy: Prisma.ProductOrderByWithRelationInput = { rating: "desc" }; // Default sort
 
     if (validatedParams.sortBy) {
-      switch (validatedParams.sortBy) {
-        case "price-asc":
-          orderBy = { price: "asc" };
-          break;
-        case "price-desc":
-          orderBy = { price: "desc" };
-          break;
-        case "rating-desc":
-          orderBy = { rating: "desc" };
-          break;
-        case "name-asc":
-          orderBy = { name: "asc" };
-          break;
-      }
+      const direction = validatedParams.sortDirection || "asc";
+      orderBy = { [validatedParams.sortBy]: direction };
     }
 
     // Calculate pagination
