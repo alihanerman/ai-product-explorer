@@ -49,7 +49,7 @@ const COMPARISON_ATTRIBUTES: ComparisonAttribute[] = [
     key: "price",
     label: "Price",
     getValue: (p) => p.price,
-    format: (v) => `$${v.toLocaleString('en-US')}`,
+    format: (v) => `$${v.toLocaleString("en-US")}`,
     higherIsBetter: false,
   },
   {
@@ -163,11 +163,20 @@ export function EnhancedComparisonView({
   const pieChartData = useMemo(() => {
     if (!comparisonResults) return [];
 
-    return products.map((product, index) => ({
-      name: product.brand,
-      value: comparisonResults.productWins[product.id],
-      color: COLORS[index % COLORS.length],
-    }));
+    return products.map((product, index) => {
+      // Create a shorter, more readable name for the chart
+      const shortName =
+        product.name.length > 25
+          ? `${product.name.substring(0, 25)}...`
+          : product.name;
+
+      return {
+        name: shortName,
+        value: comparisonResults.productWins[product.id],
+        color: COLORS[index % COLORS.length],
+        fullName: product.name, // Keep full name for tooltips
+      };
+    });
   }, [products, comparisonResults]);
 
   const recommendedProduct = useMemo(() => {
@@ -487,7 +496,12 @@ export function EnhancedComparisonView({
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip />
+                        <Tooltip
+                          formatter={(value, name, props) => [
+                            `${value} wins`,
+                            props.payload.fullName || props.payload.name,
+                          ]}
+                        />
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
