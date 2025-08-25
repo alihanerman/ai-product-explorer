@@ -86,6 +86,17 @@ const formatProductDetails = (products: Product[]): string => {
 // };
 
 export async function POST(request: NextRequest) {
+  const geminiApiKey = process.env.GEMINI_API_KEY;
+
+  if (!geminiApiKey) {
+    // Eğer API anahtarı yoksa, sunucuda bir hata logla ve istemciye hata dön.
+    console.error("GEMINI_API_KEY is not set in environment variables.");
+    return NextResponse.json(
+      { error: "Server configuration error: API key is missing." },
+      { status: 500 }
+    );
+  }
+
   let prompt = "";
   // Try different models if the first one is rate limited
   const modelUsed = "gemini-2.0-flash";
@@ -183,22 +194,22 @@ ${prefContext}
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-goog-api-key": process.env.GEMINI_API_KEY,
+          "x-goog-api-key": geminiApiKey, // Artık geminiApiKey'in bir string olduğu kesin
         },
         body: JSON.stringify({
           contents: [
             {
               parts: [
                 {
-                  text: prompt
-                }
-              ]
-            }
+                  text: prompt,
+                },
+              ],
+            },
           ],
           generationConfig: {
             temperature: 0.4,
             maxOutputTokens: 1024,
-          }
+          },
         }),
       }
     );
@@ -209,7 +220,8 @@ ${prefContext}
     }
 
     const geminiResponse = await response.json();
-    const comparison = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const comparison =
+      geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!comparison) {
       throw new Error("No response from AI service");

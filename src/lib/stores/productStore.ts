@@ -76,7 +76,11 @@ export interface ProductState {
   fetchSearchSuggestions: () => Promise<unknown[]>;
 
   // Logs API actions
-  clearAllLogs: () => Promise<{ success: boolean; deletedCount?: number; error?: string }>;
+  clearAllLogs: () => Promise<{
+    success: boolean;
+    deletedCount?: number;
+    error?: string;
+  }>;
 
   // URL actions
   initializeFromURL: (searchParams: URLSearchParams) => void;
@@ -435,25 +439,25 @@ export const useProductStore = create<ProductState>((set, get) => ({
       const response = await fetch("/api/logs", {
         method: "DELETE",
       });
-      
+
       if (response.ok) {
         const data = await response.json();
-        return { 
-          success: true, 
-          deletedCount: data.deletedCount 
+        return {
+          success: true,
+          deletedCount: data.deletedCount,
         };
       } else {
         const errorData = await response.json();
-        return { 
-          success: false, 
-          error: errorData.error || "Failed to clear logs" 
+        return {
+          success: false,
+          error: errorData.error || "Failed to clear logs",
         };
       }
     } catch (error) {
       console.error("Failed to clear logs:", error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Failed to clear logs" 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to clear logs",
       };
     }
   },
