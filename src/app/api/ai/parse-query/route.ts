@@ -1,10 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  ParseQuerySchema,
-  ProductFilters,
-  ProductFiltersSchema,
-} from "@/lib/validations";
+import { ParseQuerySchema } from "@/lib/validations";
 import { prisma } from "@/lib/prisma";
+
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const RATE_LIMIT_MAX_REQUESTS = 40; // Conservative limit to stay under 50
+
+// In-memory rate limiting (in production, use Redis or database)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const userLimit = rateLimitMap.get(userId);
+
+  if (!userLimit || now > userLimit.resetTime) {
+    // Reset or initialize rate limit
+    rateLimitMap.set(userId, {
+      count: 1,
+      resetTime: now + RATE_LIMIT_WINDOW,
+    });
+    return true;
+  }
+
+  if (userLimit.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false;
+  }
+
+  userLimit.count++;
+  return true;
+}
+
+// Using Google Gemini API directly
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,77 +40,173 @@ export async function POST(request: NextRequest) {
 
     // Create a prompt for the AI to parse natural language into structured filters
     const prompt = `
-You are a sophisticated AI assistant for an e-commerce store. Your primary function is to parse a user's natural language query into a structured JSON object.
+You are an AI that parses user queries into structured filters for database searches. Your primary goal is to generate a JSON object that accurately reflects user intent while avoiding overlapping constraints between structural filters and the original text query.
 
 # Query
 "${validatedData.query}"
 
-# Guiding Principles
-1.  **NEVER Guess Values:** Do not invent numerical values for specs like RAM or storage. If the user doesn't specify a number, do not include the field.
-2.  **NEVER Include null/undefined:** Only include fields that have actual values. Do not include fields with null, undefined, or empty values.
-3.  **Handle Typos:** Recognize common typos like "bugget" = "budget", "cheep" = "cheap", "fone" = "phone".
-4.  **Translate Relative Terms to Sorting:** Convert ambiguous terms like "best", "cheapest", "fastest", "most", "highest", "budget" into sorting instructions.
-5.  **Infer Brand and Category Aliases:** Recognize common aliases (e.g., "iphone", "macbook" -> brand: "Apple").
-6.  **Be Strict:** If the query is nonsensical or doesn't relate to products, return an empty JSON object: {}.
+# Core Rules
+1. **Separate Structural from Text Search**: When identifying key attributes (sortBy, category, brands, etc.), do NOT include those terms in any text search filter.
+2. **Clear Search Query**: If structural filters are identified, clear the searchQuery to avoid combining text search and structural filters.
+3. **No Double Filtering**: When you convert a term to a structural filter (e.g., "cheapest" -> sortBy: "price"), do NOT include that term in searchQuery.
+4. **Never Guess Values**: Do not invent numerical values for specs like RAM or storage. If the user doesn't specify a number, do not include the field.
+5. **Only Include Actual Values**: Do not include fields with null, undefined, or empty values.
+6. **Handle Typos**: Recognize common typos like "bugget" = "budget", "cheep" = "cheap", "fone" = "phone".
+7. **Translate Relative Terms**: Convert terms like "best", "cheapest", "fastest", "most", "highest", "budget" into sorting instructions.
+8. **Recognize Aliases**: Common aliases like "iphone", "macbook" -> brand: "Apple".
 
 # JSON Output Structure
-Return ONLY a valid JSON object with the following optional fields:
+Return ONLY a valid JSON object with these optional fields:
 - category: one of "phone", "tablet", "laptop", "desktop"
-- brands: array of brand names (e.g., ["Apple", "Samsung"])
+- brands: array of brand names (e.g., ["Apple", "Samsung", "Google", "Dell", "HP", "Lenovo", "Microsoft", "Asus", "Acer", "OnePlus", "Xiaomi", "Razer"])
 - minPrice: number
 - maxPrice: number
 - minRam: number (in GB)
 - minStorage: number (in GB)
 - sortBy: one of "price", "rating", "ram_gb", "storage_gb", "name"
 - sortDirection: one of "asc" (for cheapest/lowest) or "desc" (for best/highest)
+- searchQuery: string (only for generic text that doesn't fit structural filters)
 
 # Examples
-- "laptops under $1000" -> {"category": "laptop", "maxPrice": 1000}
-- "samsung phones with 12gb ram" -> {"category": "phone", "brands": ["Samsung"], "minRam": 12}
 - "cheapest dell laptop" -> {"category": "laptop", "brands": ["Dell"], "sortBy": "price", "sortDirection": "asc"}
-- "budget laptop" -> {"category": "laptop", "sortBy": "price", "sortDirection": "asc"}
+- "apple phone with best ram" -> {"category": "phone", "brands": ["Apple"], "sortBy": "ram_gb", "sortDirection": "desc"}
+- "samsung tablets under $500" -> {"category": "tablet", "brands": ["Samsung"], "maxPrice": 500}
+- "gaming laptops with 16gb ram" -> {"category": "laptop", "minRam": 16, "searchQuery": "gaming"}
+- "budget laptop for students" -> {"category": "laptop", "sortBy": "price", "sortDirection": "asc", "searchQuery": "students"}
 - "I want to bugget laptop" -> {"category": "laptop", "sortBy": "price", "sortDirection": "asc"}
-- "iphone with the most storage" -> {"category": "phone", "brands": ["Apple"], "sortBy": "storage_gb", "sortDirection": "desc"}
-- "gaming laptops with best ram" -> {"category": "laptop", "sortBy": "ram_gb", "sortDirection": "desc"}
 - "show me all tablets" -> {"category": "tablet"}
+- "macbook pro" -> {"category": "laptop", "brands": ["Apple"], "searchQuery": "pro"}
 - "what's the weather like?" -> {}
 
 Parse the user's query according to these rules and return only the JSON object.
 `;
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer":
-            process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-          "X-Title": "AI Product Explorer",
-        },
-        body: JSON.stringify({
-          model: "meta-llama/llama-3.2-3b-instruct:free",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.1,
-          max_tokens: 200,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorBody = await response.text();
-      throw new Error(
-        `OpenRouter API Error: ${response.status} ${response.statusText} - ${errorBody}`
-      );
+    // Check if we have API key
+    if (!process.env.GEMINI_API_KEY) {
+      console.warn("Gemini API key not configured, using fallback parsing");
+      return NextResponse.json({
+        originalQuery: validatedData.query,
+        parsedFilters: {},
+      });
     }
 
-    const aiResponse = await response.json();
+    // Check rate limit
+    const userId = "default"; // In production, get from auth
+    if (!checkRateLimit(userId)) {
+      console.warn("Rate limit exceeded, using fallback parsing");
+      return NextResponse.json({
+        originalQuery: validatedData.query,
+        parsedFilters: {},
+      });
+    }
+
+    // Try different models until one works
+    let aiResponse: {
+      choices?: Array<{ message?: { content?: string } }>;
+    } | null = null;
+    let modelUsed = "";
+    let lastError = "";
+
+    // Use Google Gemini API instead of OpenRouter
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-goog-api-key": process.env.GEMINI_API_KEY,
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: prompt
+                  }
+                ]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.1,
+              maxOutputTokens: 200,
+            }
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        lastError = `Google Gemini API Error: ${response.status} ${response.statusText} - ${errorBody}`;
+        throw new Error(lastError);
+      }
+
+      const geminiResponse = await response.json();
+      modelUsed = "gemini-2.0-flash";
+      
+      // Extract text from Gemini response format
+      const generatedText = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!generatedText) {
+        throw new Error("No content generated by Gemini");
+      }
+      
+      // Convert to OpenRouter-like format for compatibility with existing code
+      aiResponse = {
+        choices: [{
+          message: {
+            content: generatedText
+          }
+        }]
+      };
+      
+    } catch (error) {
+      console.error("Error with Gemini API:", error);
+      lastError = error instanceof Error ? error.message : String(error);
+      
+      // Log the error for monitoring
+      try {
+        await prisma.aiLog.create({
+          data: {
+            prompt,
+            response: JSON.stringify({
+              error: lastError,
+              originalQuery: validatedData.query,
+              parsedFilters: {},
+            }),
+            modelUsed: "gemini-error",
+          },
+        });
+      } catch (logError) {
+        console.error("Failed to log error:", logError);
+      }
+    }
+
+    // If no model worked, use fallback
+    if (!aiResponse) {
+      console.warn("All AI models failed, using fallback parsing");
+      try {
+        await prisma.aiLog.create({
+          data: {
+            prompt,
+            response: JSON.stringify({
+              error: "All models failed",
+              lastError,
+              originalQuery: validatedData.query,
+              parsedFilters: {},
+            }),
+            modelUsed: "fallback",
+          },
+        });
+      } catch (logError) {
+        console.error("Failed to log model failure:", logError);
+      }
+
+      return NextResponse.json({
+        originalQuery: validatedData.query,
+        parsedFilters: {},
+      });
+    }
+
     const aiContent = aiResponse.choices?.[0]?.message?.content?.trim();
 
     if (!aiContent) {
@@ -91,12 +214,12 @@ Parse the user's query according to these rules and return only the JSON object.
     }
 
     // Try to parse the AI response as JSON
-    let parsedFilters: Partial<ProductFilters> = {};
+    let parsedFilters: Record<string, unknown> = {};
     try {
       // Extract JSON from the response (in case there's extra text)
       const jsonMatch = aiContent.match(/\{[\s\S]*\}/);
       const jsonString = jsonMatch ? jsonMatch[0] : aiContent;
-      const rawFilters = JSON.parse(jsonString);
+      const rawFilters = JSON.parse(jsonString) as Record<string, unknown>;
 
       // Clean up the parsed filters - remove null, undefined, and empty values
       Object.keys(rawFilters).forEach((key) => {
@@ -107,10 +230,7 @@ Parse the user's query according to these rules and return only the JSON object.
           value !== "" &&
           !(Array.isArray(value) && value.length === 0)
         ) {
-          // Only assign valid keys that exist in ProductFilters
-          if (key in ProductFiltersSchema.shape) {
-            (parsedFilters as Record<string, unknown>)[key] = value;
-          }
+          parsedFilters[key] = value;
         }
       });
     } catch {
@@ -129,7 +249,7 @@ Parse the user's query according to these rules and return only the JSON object.
             parsedFilters,
             aiContent,
           }),
-          modelUsed: "meta-llama/llama-3.2-3b-instruct:free",
+          modelUsed: modelUsed, // Log the model that actually worked
         },
       });
     } catch (logError) {

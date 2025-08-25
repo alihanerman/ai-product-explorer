@@ -12,7 +12,7 @@ import { useProductStore } from "@/lib/stores/productStore";
 export function HomeContent() {
   const searchParams = useSearchParams();
   const { user, checkAuth } = useAuthStore();
-  const { setFavoriteProductIds, initializeFromURL, fetchProducts } =
+  const { fetchFavorites, initializeFromURL, fetchProducts } =
     useProductStore();
 
   // State for sidebar toggling (closed by default on mobile, open on desktop)
@@ -33,24 +33,10 @@ export function HomeContent() {
 
   useEffect(() => {
     // Kullanıcı giriş yaptığında favorilerini çek
-    const fetchFavorites = async () => {
-      if (user) {
-        try {
-          const response = await fetch("/api/favorites");
-          if (response.ok) {
-            const data = await response.json();
-            setFavoriteProductIds(data.favoriteProductIds);
-          }
-        } catch (error) {
-          console.error("Failed to fetch favorites:", error);
-        }
-      } else {
-        setFavoriteProductIds([]);
-      }
-    };
-
-    fetchFavorites();
-  }, [user, setFavoriteProductIds]);
+    if (user) {
+      fetchFavorites();
+    }
+  }, [user, fetchFavorites]);
 
   // İlk yükleme
   useEffect(() => {

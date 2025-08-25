@@ -88,13 +88,7 @@ const formatProductDetails = (products: Product[]): string => {
 export async function POST(request: NextRequest) {
   let prompt = "";
   // Try different models if the first one is rate limited
-  const availableModels = [
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "google/gemma-2-9b-it:free",
-    "mistralai/mistral-7b-instruct:free",
-    "openchat/openchat-7b:free",
-  ];
-  const modelUsed = availableModels[0]; // Default model
+  const modelUsed = "gemini-2.0-flash";
 
   try {
     await getAuthUser(); // Verify authentication
@@ -184,21 +178,27 @@ ${prefContext}
 
     // --- AI SERVICE CALL ---
     const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
-          "HTTP-Referer":
-            process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-          "X-Title": "AI Product Explorer",
+          "X-goog-api-key": process.env.GEMINI_API_KEY,
         },
         body: JSON.stringify({
-          model: modelUsed,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.4,
-          max_tokens: 1024,
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 1024,
+          }
         }),
       }
     );
@@ -208,8 +208,8 @@ ${prefContext}
       throw new Error("AI service request failed");
     }
 
-    const aiResponse = await response.json();
-    const comparison = aiResponse.choices?.[0]?.message?.content?.trim();
+    const geminiResponse = await response.json();
+    const comparison = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!comparison) {
       throw new Error("No response from AI service");

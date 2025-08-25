@@ -6,7 +6,6 @@ import {
   SlidersHorizontal,
   PanelLeftOpen,
   PanelLeftClose,
-  ChevronRight,
   Heart,
   FileText,
 } from "lucide-react";

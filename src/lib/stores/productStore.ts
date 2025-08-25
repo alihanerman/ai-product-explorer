@@ -65,6 +65,14 @@ export interface ProductState {
     usage?: "basic" | "work" | "gaming" | "creative";
     mobility?: "desktop" | "portable" | "ultraportable";
   }) => Promise<void>;
+  
+  // Favorites API actions
+  fetchFavorites: () => Promise<void>;
+  toggleFavoriteAPI: (productId: string) => Promise<void>;
+  fetchFavoriteProducts: () => Promise<Product[]>;
+  
+  // Search API actions
+  fetchSearchSuggestions: () => Promise<any[]>;
 
   // URL actions
   initializeFromURL: (searchParams: URLSearchParams) => void;
@@ -211,7 +219,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   parseSearchQuery: async (query: string) => {
-    set({ isLoading: true, error: null, searchQuery: query });
+    set({ isLoading: true, error: null });
 
     try {
       const response = await fetch("/api/ai/parse-query", {
@@ -227,7 +235,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
       const data = await response.json();
       const { parsedFilters } = data;
 
-      // Apply the parsed filters, including sorting
+      // Check if AI found meaningful structural filters
+      const hasStructuralFilters = !!(
+        parsedFilters.category ||
+        parsedFilters.brands?.length ||
+        parsedFilters.minPrice ||
+        parsedFilters.maxPrice ||
+        parsedFilters.sortBy
+      );
+
+      // Apply the parsed filters
       const newFilters: ProductFilters = {};
       if (parsedFilters.category) newFilters.category = parsedFilters.category;
       if (parsedFilters.brands) newFilters.brands = parsedFilters.brands;
@@ -237,8 +254,19 @@ export const useProductStore = create<ProductState>((set, get) => ({
       if (parsedFilters.sortDirection)
         newFilters.sortDirection = parsedFilters.sortDirection;
 
+      // Determine the search query based on AI analysis
+      let finalSearchQuery = "";
+      if (hasStructuralFilters) {
+        // If AI found structural filters, only use AI's searchQuery (if any)
+        finalSearchQuery = parsedFilters.searchQuery || "";
+      } else {
+        // If no structural filters found, use original query for text search
+        finalSearchQuery = query;
+      }
+
       set(() => ({
-        filters: newFilters, // Overwrite filters with AI-parsed ones
+        filters: newFilters,
+        searchQuery: finalSearchQuery,
         currentPage: 1,
       }));
 
@@ -250,6 +278,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
             ? error.message
             : "Failed to parse search query",
         isLoading: false,
+        searchQuery: query, // Fallback to original query
       });
       // Fallback to simple text search if AI fails
       await get().fetchProducts();
@@ -295,6 +324,88 @@ export const useProductStore = create<ProductState>((set, get) => ({
             : "Failed to generate comparison",
         isComparingLoading: false,
       });
+    }
+  },
+
+  // Favorites API actions
+  fetchFavorites: async () => {
+    try {
+      const response = await fetch("/api/favorites");
+      if (response.ok) {
+        const data = await response.json();
+        set({ favoriteProductIds: data.favoriteProductIds });
+      }
+    } catch (error) {
+      console.error("Failed to fetch favorites:", error);
+      set({ error: "Failed to fetch favorites" });
+    }
+  },
+
+  toggleFavoriteAPI: async (productId: string) => {
+    const state = get();
+    const isFavorited = state.favoriteProductIds.includes(productId);
+    
+    try {
+      const response = await fetch("/api/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId,
+          action: isFavorited ? "remove" : "add",
+        }),
+      });
+
+      if (response.ok) {
+        // Update local state immediately for better UX
+        get().toggleFavorite(productId);
+      } else {
+        throw new Error("Failed to update favorite");
+      }
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      set({ error: "Failed to update favorite" });
+    }
+  },
+
+  fetchFavoriteProducts: async () => {
+    const state = get();
+    if (!state.favoriteProductIds.length) return [];
+
+    try {
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productIds: state.favoriteProductIds,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.products || [];
+      } else {
+        throw new Error("Failed to fetch favorite products");
+      }
+    } catch (error) {
+      console.error("Failed to fetch favorite products:", error);
+      set({ error: "Failed to fetch favorite products" });
+      return [];
+    }
+  },
+
+  // Search API actions
+  fetchSearchSuggestions: async () => {
+    try {
+      const response = await fetch("/api/search/suggestions");
+      if (response.ok) {
+        const data = await response.json();
+        return data.suggestions || [];
+      } else {
+        throw new Error("Failed to fetch suggestions");
+      }
+    } catch (error) {
+      console.error("Failed to fetch suggestions:", error);
+      return [];
     }
   },
 

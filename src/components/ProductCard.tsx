@@ -18,7 +18,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { user } = useAuthStore();
   const {
     favoriteProductIds,
-    toggleFavorite,
+    toggleFavoriteAPI,
     addToComparison,
     comparisonList,
   } = useProductStore();
@@ -36,15 +36,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
     setIsTogglingFavorite(true);
     try {
-      const response = await fetch("/api/favorites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id }),
-      });
-
-      if (response.ok) {
-        toggleFavorite(product.id);
-      }
+      await toggleFavoriteAPI(product.id);
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
     } finally {

@@ -37,7 +37,7 @@ export function SearchBar() {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [searchHistory, setSearchHistory] = useState<SearchHistory[]>([]);
 
-  const { parseSearchQuery, isLoading, searchQuery } = useProductStore();
+  const { parseSearchQuery, isLoading, searchQuery, fetchSearchSuggestions } = useProductStore();
   const debouncedQuery = useDebounce(query, 300);
 
   const searchRef = useRef<HTMLDivElement>(null);
@@ -107,17 +107,12 @@ export function SearchBar() {
           }));
 
         try {
-          const response = await fetch("/api/search/suggestions");
-          if (response.ok) {
-            const data = await response.json();
-            const popularSuggestions: Suggestion[] = (
-              data.suggestions || []
-            ).map((s: Suggestion) => ({
-              ...s,
-              type: "popular" as const,
-            }));
-            setSuggestions([...historySuggestions, ...popularSuggestions]);
-          }
+          const suggestions = await fetchSearchSuggestions();
+          const popularSuggestions: Suggestion[] = suggestions.map((s: Suggestion) => ({
+            ...s,
+            type: "popular" as const,
+          }));
+          setSuggestions([...historySuggestions, ...popularSuggestions]);
         } catch (error) {
           console.error("Failed to fetch popular suggestions:", error);
           setSuggestions(historySuggestions);

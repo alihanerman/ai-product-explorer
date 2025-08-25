@@ -10,7 +10,7 @@ import { useProductStore } from "@/lib/stores/productStore";
 
 export default function FavoritesPage() {
   const { user, checkAuth } = useAuthStore();
-  const { favoriteProductIds } = useProductStore();
+  const { favoriteProductIds, fetchFavoriteProducts } = useProductStore();
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export default function FavoritesPage() {
   );
 
   useEffect(() => {
-    const fetchFavoriteProducts = async () => {
+    const loadFavoriteProducts = async () => {
       if (!user || favoriteProductIds.length === 0) {
         setFavoriteProducts([]);
         setIsLoading(false);
@@ -51,20 +51,10 @@ export default function FavoritesPage() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch favorite product details
-        const response = await fetch("/api/products", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productIds: favoriteProductIds }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const sortedProducts = sortProducts(data.products || [], sortBy);
-          setFavoriteProducts(sortedProducts);
-        } else {
-          setError("An error occurred while loading favorite products");
-        }
+        // Fetch favorite product details using store function
+        const products = await fetchFavoriteProducts();
+        const sortedProducts = sortProducts(products, sortBy);
+        setFavoriteProducts(sortedProducts);
       } catch (error) {
         console.error("Failed to fetch favorite products:", error);
         setError("An error occurred while loading favorite products");
@@ -73,8 +63,8 @@ export default function FavoritesPage() {
       }
     };
 
-    fetchFavoriteProducts();
-  }, [user, favoriteProductIds, sortBy, sortProducts]);
+    loadFavoriteProducts();
+  }, [user, favoriteProductIds, sortBy, sortProducts, fetchFavoriteProducts]);
 
   // Filter out products that are no longer favorited - only when favorite IDs change
   useEffect(() => {

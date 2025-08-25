@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Product } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { AIRecommendationDisplay } from "@/components/AIRecommendationDisplay";
 import {
   PieChart,
   Pie,
@@ -558,17 +559,12 @@ export function EnhancedComparisonView({
                   attributes.
                 </p>
                 {comparisonSummary && (
-                  <div className="mt-4 pt-4 border-t border-green-200">
-                    <h4 className="font-medium mb-2 text-green-700 dark:text-green-300">
-                      AI Analysis:
+                  <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+                    <h4 className="font-medium mb-4 text-green-700 dark:text-green-300 flex items-center gap-2">
+                      <Trophy className="h-5 w-5" />
+                      AI Analysis & Recommendations:
                     </h4>
-                    <div className="prose prose-sm max-w-none text-green-800 dark:text-green-200">
-                      {comparisonSummary.split("\n").map((paragraph, index) => (
-                        <p key={index} className="mb-2 last:mb-0">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
+                    <AIRecommendationDisplay content={comparisonSummary} />
                   </div>
                 )}
               </CardContent>
