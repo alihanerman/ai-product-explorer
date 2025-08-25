@@ -27,14 +27,14 @@ export function Header() {
   const handleHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
     resetSearchAndFilters();
-    router.push('/');
+    router.push("/");
   };
 
   return (
     <header className="border-b bg-background sticky top-0 z-40">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           onClick={handleHomeClick}
           className="text-xl sm:text-2xl font-bold text-primary"
         >
@@ -99,10 +99,10 @@ export function Header() {
           <ThemeToggle />
         </nav>
       </div>
-      
-      <LogsModal 
-        isOpen={isLogsModalOpen} 
-        onClose={() => setIsLogsModalOpen(false)} 
+
+      <LogsModal
+        isOpen={isLogsModalOpen}
+        onClose={() => setIsLogsModalOpen(false)}
       />
     </header>
   );

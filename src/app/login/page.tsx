@@ -1,22 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { useAuthStore } from "@/lib/stores/authStore";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('test@example.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState("test@example.com");
+  const [password, setPassword] = useState("password123");
   const { login, isLoading, error, user } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
     if (user) {
-      router.push('/');
+      router.push("/");
     }
   }, [user, router]);
 
@@ -24,7 +30,7 @@ export default function LoginPage() {
     e.preventDefault();
     const success = await login(email, password);
     if (success) {
-      router.push('/');
+      router.push("/");
     }
   };
 
@@ -37,7 +43,7 @@ export default function LoginPage() {
             Sign in to your AI Product Explorer account
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
@@ -45,7 +51,7 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            
+
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
@@ -59,7 +65,7 @@ export default function LoginPage() {
                 placeholder="test@example.com"
               />
             </div>
-            
+
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
                 Password
@@ -73,12 +79,12 @@ export default function LoginPage() {
                 placeholder="password123"
               />
             </div>
-            
+
             <Button type="submit" className="w-full" isLoading={isLoading}>
               Sign In
             </Button>
           </form>
-          
+
           <div className="mt-6 p-4 bg-muted rounded-lg">
             <h4 className="font-medium mb-2">Demo Account</h4>
             <p className="text-sm text-muted-foreground mb-2">
@@ -89,9 +95,12 @@ export default function LoginPage() {
               <div>Password: password123</div>
             </div>
           </div>
-          
+
           <div className="mt-4 text-center">
-            <Link href="/" className="text-sm text-muted-foreground hover:underline">
+            <Link
+              href="/"
+              className="text-sm text-muted-foreground hover:underline"
+            >
               ← Back to Products
             </Link>
           </div>
