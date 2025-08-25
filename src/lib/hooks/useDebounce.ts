@@ -33,7 +33,6 @@ export function useDebounceCallback<
 
   const debouncedCallback = useCallback(
     (...args: Parameters<F>) => {
-
       if (timeoutId) {
         clearTimeout(timeoutId);
       }

@@ -49,7 +49,7 @@ const COMPARISON_ATTRIBUTES: ComparisonAttribute[] = [
     key: "price",
     label: "Price",
     getValue: (p) => p.price,
-    format: (v) => `$${v.toLocaleString()}`,
+    format: (v) => `$${v.toLocaleString('en-US')}`,
     higherIsBetter: false,
   },
   {
@@ -499,9 +499,9 @@ export function EnhancedComparisonView({
                     <div className="space-y-2">
                       {pieChartData
                         .sort((a, b) => b.value - a.value)
-                        .map((item) => (
+                        .map((item, index) => (
                           <div
-                            key={item.name}
+                            key={`${item.name}-${index}`}
                             className="flex items-center justify-between"
                           >
                             <div className="flex items-center gap-2">

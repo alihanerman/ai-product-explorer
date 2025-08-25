@@ -73,6 +73,9 @@ export async function GET(request: NextRequest) {
       where: {
         brand: { contains: searchQuery, mode: "insensitive" },
       },
+      orderBy: {
+        brand: "asc",
+      },
       take: 3,
     });
 
@@ -81,6 +84,9 @@ export async function GET(request: NextRequest) {
       by: ["category"],
       where: {
         category: { contains: searchQuery, mode: "insensitive" },
+      },
+      orderBy: {
+        category: "asc",
       },
       take: 3,
     });

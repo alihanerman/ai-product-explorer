@@ -3,8 +3,10 @@
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Slider } from "@/components/ui/slider";
 import { useProductStore, ProductFilters } from "@/lib/stores/productStore";
-import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useDebounceCallback } from "@/lib/hooks/useDebounce";
+import { useState, useEffect } from "react";
 
 const CATEGORIES = [
   { value: "phone", label: "Phones" },
@@ -48,7 +50,25 @@ const SORT_OPTIONS: {
 
 export function FilterSidebar() {
   const { filters, setFilters, fetchProducts } = useProductStore();
-  const debouncedFetch = useDebounce(fetchProducts, 500);
+  const debouncedFetch = useDebounceCallback(fetchProducts, 500);
+
+  // Price range state for slider
+  const [priceRange, setPriceRange] = useState<[number, number]>([350, 2890]);
+  const [isSliderActive, setIsSliderActive] = useState(false);
+
+  // Constants for price range (based on actual product data)
+  const MIN_PRICE = 350;
+  const MAX_PRICE = 2890;
+
+  // Update slider when filters change
+  useEffect(() => {
+    if (!isSliderActive) {
+      setPriceRange([
+        filters.minPrice ?? MIN_PRICE,
+        filters.maxPrice ?? MAX_PRICE,
+      ]);
+    }
+  }, [filters.minPrice, filters.maxPrice, isSliderActive]);
 
   const handleFilterChange = <K extends keyof ProductFilters>(
     key: K,
@@ -84,8 +104,27 @@ export function FilterSidebar() {
     handleFilterChange("brands", newBrands.length > 0 ? newBrands : undefined);
   };
 
+  const handlePriceRangeChange = (newRange: [number, number]) => {
+    setPriceRange(newRange);
+    setIsSliderActive(true);
+
+    // Apply filters
+    handleFilterChange(
+      "minPrice",
+      newRange[0] === MIN_PRICE ? undefined : newRange[0]
+    );
+    handleFilterChange(
+      "maxPrice",
+      newRange[1] === MAX_PRICE ? undefined : newRange[1]
+    );
+
+    // Reset slider active state after a delay
+    setTimeout(() => setIsSliderActive(false), 100);
+  };
+
   const clearFilters = () => {
     setFilters({});
+    setPriceRange([MIN_PRICE, MAX_PRICE]);
     fetchProducts();
   };
 
@@ -156,31 +195,42 @@ export function FilterSidebar() {
       {/* Price Range */}
       <div className="space-y-3">
         <h3 className="font-medium">Price Range</h3>
-        <div className="space-y-2">
-          <Input
-            type="number"
-            placeholder="Min price"
-            value={filters.minPrice ?? ""}
-            onChange={(e) =>
-              handleFilterChange(
-                "minPrice",
-                e.target.value === "" ? undefined : parseFloat(e.target.value)
-              )
-            }
-            min="0"
-          />
-          <Input
-            type="number"
-            placeholder="Max price"
-            value={filters.maxPrice ?? ""}
-            onChange={(e) =>
-              handleFilterChange(
-                "maxPrice",
-                e.target.value === "" ? undefined : parseFloat(e.target.value)
-              )
-            }
-            min="0"
-          />
+        <div className="space-y-4">
+          {/* Price Display */}
+          <div className="flex items-center justify-between text-sm font-medium mb-2">
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">Min:</span>
+              <span className="text-primary">${priceRange[0].toLocaleString('en-US')}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">Max:</span>
+              <span className="text-primary">${priceRange[1].toLocaleString('en-US')}</span>
+            </div>
+          </div>
+
+          {/* Dual Range Slider */}
+          <div className="px-1 py-2">
+            <Slider
+              value={priceRange}
+              onValueChange={(value) => {
+                if (value.length === 2) {
+                  handlePriceRangeChange([value[0], value[1]]);
+                }
+              }}
+              min={MIN_PRICE}
+              max={MAX_PRICE}
+              step={25}
+              className="w-full"
+            />
+          </div>
+          
+          {/* Price range hints */}
+          <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+            <span>${MIN_PRICE}</span>
+            <span>${MAX_PRICE.toLocaleString('en-US')}</span>
+          </div>
+
+
         </div>
       </div>
 

@@ -167,7 +167,7 @@ export function ProductGrid() {
           <Search className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No products found</h3>
           <div className="space-y-2 text-muted-foreground">
-            {searchQuery && <p>No results for "{searchQuery}"</p>}
+            {searchQuery && <p>No results for &quot;{searchQuery}&quot;</p>}
             {activeFiltersCount > 0 && (
               <p>Try adjusting your filters ({activeFiltersCount} active)</p>
             )}
@@ -189,7 +189,7 @@ export function ProductGrid() {
             </h2>
             {searchQuery && (
               <div className="text-sm text-muted-foreground">
-                for "{searchQuery}"
+                for &quot;{searchQuery}&quot;
               </div>
             )}
           </div>

@@ -152,7 +152,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <CardFooter className="p-4 pt-0 flex justify-between flex-col gap-2">
           <div className="flex items-center justify-center w-full">
             <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary">
-              ${product.price.toLocaleString()}
+              ${product.price.toLocaleString('en-US')}
             </span>
           </div>
           <Button

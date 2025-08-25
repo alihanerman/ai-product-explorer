@@ -113,7 +113,7 @@ export function ComparisonTray() {
                 </h4>
                 <p className="text-xs text-muted-foreground">{product.brand}</p>
                 <p className="text-xs sm:text-sm font-semibold text-primary">
-                  ${product.price.toLocaleString()}
+                  ${product.price.toLocaleString('en-US')}
                 </p>
               </div>
             </div>

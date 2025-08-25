@@ -88,7 +88,7 @@ Parse this query and return only the JSON:
           response: JSON.stringify({
             originalQuery: validatedData.query,
             parsedFilters,
-            aiContent
+            aiContent,
           }),
           modelUsed: "microsoft/phi-3-mini-128k-instruct:free",
         },

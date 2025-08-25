@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
               </p>
 
               <div className="text-3xl sm:text-4xl font-bold text-primary mb-4 sm:mb-6">
-                ${product.price.toLocaleString()}
+                ${product.price.toLocaleString('en-US')}
               </div>
             </div>
 

@@ -76,13 +76,27 @@ export default function FavoritesPage() {
     fetchFavoriteProducts();
   }, [user, favoriteProductIds, sortBy, sortProducts]);
 
+  // Filter out products that are no longer favorited - only when favorite IDs change
+  useEffect(() => {
+    setFavoriteProducts((prev) => {
+      if (prev.length === 0) return prev;
+
+      const filteredProducts = prev.filter((product) =>
+        favoriteProductIds.includes(product.id)
+      );
+
+      // Only return new array if something actually changed
+      return filteredProducts.length !== prev.length ? filteredProducts : prev;
+    });
+  }, [favoriteProductIds]);
+
   // Re-sort existing products when sortBy changes
   useEffect(() => {
-    if (favoriteProducts.length > 0) {
-      const sortedProducts = sortProducts(favoriteProducts, sortBy);
-      setFavoriteProducts(sortedProducts);
-    }
-  }, [sortBy, favoriteProducts, sortProducts]);
+    setFavoriteProducts((prev) => {
+      if (prev.length === 0) return prev;
+      return sortProducts(prev, sortBy);
+    });
+  }, [sortBy, sortProducts]);
 
   // Redirect to login page if user is not logged in
   if (!user) {

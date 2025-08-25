@@ -59,7 +59,7 @@ const formatProductDetails = (products: Product[]): string => {
 - Product Name: ${p.name}
   - Category: ${p.category}
   - Brand: ${p.brand}
-  - Price: $${p.price.toLocaleString()}
+  - Price: $${p.price.toLocaleString('en-US')}
   - Rating: ${p.rating}/5
   - CPU: ${p.cpu}
   - RAM: ${p.ram_gb}GB
@@ -111,19 +111,19 @@ const generateManualComparison = (
     (a, b) => b.ram_gb - a.ram_gb
   );
 
-  comparison += `**Price Range:** $${sortedByPrice[0].price.toLocaleString()} to $${sortedByPrice[
+  comparison += `**Price Range:** $${sortedByPrice[0].price.toLocaleString('en-US')} to $${sortedByPrice[
     sortedByPrice.length - 1
-  ].price.toLocaleString()}\n\n`;
+  ].price.toLocaleString('en-US')}\n\n`;
   comparison += `**Most Affordable:** ${sortedByPrice[0].brand} ${
     sortedByPrice[0].name
-  } at $${sortedByPrice[0].price.toLocaleString()}\n\n`;
+  } at $${sortedByPrice[0].price.toLocaleString('en-US')}\n\n`;
   comparison += `**Highest Rated:** ${sortedByRating[0].brand} ${sortedByRating[0].name} (${sortedByRating[0].rating}/5 stars)\n\n`;
   comparison += `**Most RAM:** ${sortedByRAM[0].brand} ${sortedByRAM[0].name} with ${sortedByRAM[0].ram_gb}GB\n\n`;
 
   comparison += "### Quick Specs Overview\n\n";
   productsToCompare.forEach((product) => {
     comparison += `**${product.brand} ${product.name}**\n`;
-    comparison += `- Price: $${product.price.toLocaleString()}\n`;
+    comparison += `- Price: $${product.price.toLocaleString('en-US')}\n`;
     comparison += `- Rating: ${product.rating}/5\n`;
     comparison += `- RAM: ${product.ram_gb}GB | Storage: ${product.storage_gb}GB\n`;
     comparison += `- CPU: ${product.cpu}\n\n`;
@@ -135,7 +135,7 @@ const generateManualComparison = (
   if (userPreferences?.budget === "low") {
     comparison += `**Budget-Focused Choice:** The **${sortedByPrice[0].brand} ${
       sortedByPrice[0].name
-    }** at $${sortedByPrice[0].price.toLocaleString()} offers the best value for money.\n\n`;
+    }** at $${sortedByPrice[0].price.toLocaleString('en-US')} offers the best value for money.\n\n`;
   } else if (userPreferences?.budget === "high") {
     comparison += `**Premium Choice:** For the best specs regardless of price, consider the **${sortedByRAM[0].brand} ${sortedByRAM[0].name}** with top-tier performance.\n\n`;
   }

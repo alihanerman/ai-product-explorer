@@ -96,7 +96,7 @@ export function LogsModal({ isOpen, onClose }: LogsModalProps) {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        {new Date(log.createdAt).toLocaleString()}
+                        {new Date(log.createdAt).toLocaleString('en-US')}
                       </CardTitle>
                       <span className="text-xs bg-secondary px-2 py-1 rounded">
                         {log.modelUsed}
