@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 className={`absolute bottom-3 left-3 h-9 w-9 p-0 rounded-full backdrop-blur-sm shadow-lg border transition-all duration-200 hover:scale-110 ${
                   isFavorited
                     ? "bg-red-500/90 border-red-400 text-white hover:bg-red-600/90"
-                    : "bg-white/90 border-gray-200 text-gray-600 hover:bg-white hover:text-red-500"
+                    : "bg-card/90 border-border text-muted-foreground hover:bg-card hover:text-red-500 dark:bg-card/80 dark:border-border/50"
                 }`}
                 title={
                   isFavorited ? "Remove from favorites" : "Add to favorites"
@@ -94,7 +94,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 size="sm"
                 variant="ghost"
                 onClick={handleAddToComparison}
-                className="absolute bottom-3 right-3 h-9 w-9 p-0 rounded-full backdrop-blur-sm bg-white/90 border border-gray-200 text-gray-600 shadow-lg hover:bg-blue-500 hover:text-white hover:border-blue-400 transition-all duration-200 hover:scale-110"
+                className="absolute bottom-3 right-3 h-9 w-9 p-0 rounded-full backdrop-blur-sm bg-card/90 border border-border text-muted-foreground shadow-lg hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 hover:scale-110 dark:bg-card/80 dark:border-border/50"
                 title="Add to comparison"
               >
                 <ArrowLeftRight className="h-4 w-4" />
@@ -113,7 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 className={`h-9 w-9 p-0 rounded-full backdrop-blur-sm shadow-lg border transition-all duration-200 hover:scale-110 ${
                   isFavorited
                     ? "bg-red-500/90 border-red-400 text-white hover:bg-red-600/90"
-                    : "bg-white/90 border-gray-200 text-gray-600 hover:bg-white hover:text-red-500"
+                    : "bg-card/90 border-border text-muted-foreground hover:bg-card hover:text-red-500 dark:bg-card/80 dark:border-border/50"
                 }`}
                 title={
                   isFavorited ? "Remove from favorites" : "Add to favorites"
@@ -132,7 +132,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 size="sm"
                 variant="ghost"
                 onClick={handleAddToComparison}
-                className="h-9 w-9 p-0 rounded-full backdrop-blur-sm bg-white/90 border border-gray-200 text-gray-600 shadow-lg hover:bg-blue-500 hover:text-white hover:border-blue-400 transition-all duration-200 hover:scale-110"
+                className="h-9 w-9 p-0 rounded-full backdrop-blur-sm bg-card/90 border border-border text-muted-foreground shadow-lg hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-200 hover:scale-110 dark:bg-card/80 dark:border-border/50"
                 title="Add to comparison"
               >
                 <ArrowLeftRight className="h-4 w-4" />

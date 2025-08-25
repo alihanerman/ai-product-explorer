@@ -191,7 +191,11 @@ export default function ProductDetailPage() {
                   variant={isFavorited ? "destructive" : "outline"}
                   onClick={handleToggleFavorite}
                   isLoading={isTogglingFavorite}
-                  className="w-full sm:w-auto text-sm"
+                  className={`w-full sm:w-auto text-sm ${
+                    isFavorited
+                      ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      : "border-border hover:bg-accent hover:text-accent-foreground"
+                  }`}
                 >
                   <Heart
                     className={`h-4 w-4 mr-2 ${
@@ -211,7 +215,7 @@ export default function ProductDetailPage() {
                 <Button
                   variant="outline"
                   onClick={handleAddToComparison}
-                  className="w-full sm:w-auto text-sm"
+                  className="w-full sm:w-auto text-sm border-border hover:bg-accent hover:text-accent-foreground"
                 >
                   <ArrowLeftRight className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Add to Compare</span>

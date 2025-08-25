@@ -301,7 +301,7 @@ export function SearchBar() {
               setIsOpen(true);
               void fetchSuggestions(query);
             }}
-            className="pl-10 pr-4 text-sm sm:text-base"
+            className="pl-10 pr-4 text-sm sm:text-base text-foreground"
             autoComplete="off"
           />
         </div>

@@ -10,7 +10,6 @@ import {
   PanelRightClose,
   Scale,
   ArrowLeftRight,
-  
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -120,37 +119,38 @@ export function ComparisonTray({
             {/* Clear all comparison button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={clearComparison}
-              className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
+              disabled={comparisonList.length === 0}
+              className="!bg-transparent !border-0 !text-red-500 hover:!text-red-600 hover:!bg-red-50 dark:!text-red-400 dark:hover:!text-red-300 dark:hover:!bg-red-950/20"
               title="Clear all comparisons"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
 
             {/* Desktop toggle button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onToggle}
-              className="hidden lg:flex h-8 w-8 p-0"
+              className="hidden lg:flex"
             >
               {isOpen ? (
-                <PanelRightClose className="h-4 w-4" />
+                <PanelRightClose className="h-5 w-5" />
               ) : (
-                <PanelRightOpen className="h-4 w-4" />
+                <PanelRightOpen className="h-5 w-5" />
               )}
             </Button>
 
             {/* Mobile close panel button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={onToggle}
-              className="lg:hidden h-8 w-8 p-0"
+              className="lg:hidden"
               title="Close comparison panel"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -161,7 +161,7 @@ export function ComparisonTray({
             <Button
               onClick={() => handleGenerateComparison()}
               isLoading={isComparingLoading}
-              className="w-full bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-500 dark:from-yellow-500 dark:via-orange-500 dark:to-amber-600 hover:from-yellow-500 hover:via-orange-500 hover:to-amber-600 dark:hover:from-yellow-400 dark:hover:via-orange-400 dark:hover:to-amber-500 text-white dark:text-gray-900 border-0 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              className="w-full bg-gradient-to-r from-primary via-primary/90 to-primary/80 hover:from-primary/90 hover:via-primary hover:to-primary/90 text-primary-foreground border-0 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
               size="sm"
             >
               <div className="flex items-center gap-2">
@@ -214,9 +214,9 @@ export function ComparisonTray({
                 variant="ghost"
                 size="icon"
                 onClick={() => removeFromComparison(product.id)}
-                className="absolute top-2 right-2 h-6 w-6 rounded-md opacity-100 lg:opacity-0 lg:group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition-all duration-200"
+                className="absolute top-2 right-2 !bg-transparent !border-0 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 !text-red-500 hover:!text-red-600 hover:!bg-red-50 dark:!text-red-400 dark:hover:!text-red-300 dark:hover:!bg-red-950/20 transition-all duration-200"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
                 <span className="sr-only">Remove from comparison</span>
               </Button>
             </div>
@@ -232,11 +232,11 @@ export function ComparisonTray({
               <h2 className="text-xl font-semibold">Product Comparison</h2>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => setShowComparisonModal(false)}
-                className="h-8 w-8 p-0"
+                className="!bg-transparent !border-0 !text-red-500 hover:!text-red-600 hover:!bg-red-50 dark:!text-red-400 dark:hover:!text-red-300 dark:hover:!bg-red-950/20"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
             <div className="flex-1 overflow-auto p-4">
