@@ -7,13 +7,13 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Heart,
-  Plus,
   Star,
   Cpu,
   HardDrive,
   Monitor,
   Battery,
   Weight,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Product } from "@prisma/client";
 import { Header } from "@/components/Header";
@@ -180,7 +180,7 @@ export default function ProductDetailPage() {
               </p>
 
               <div className="text-3xl sm:text-4xl font-bold text-primary mb-4 sm:mb-6">
-                ${product.price.toLocaleString('en-US')}
+                ${product.price.toLocaleString("en-US")}
               </div>
             </div>
 
@@ -213,7 +213,7 @@ export default function ProductDetailPage() {
                   onClick={handleAddToComparison}
                   className="w-full sm:w-auto text-sm"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <ArrowLeftRight className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Add to Compare</span>
                   <span className="sm:hidden">Compare</span>
                 </Button>
