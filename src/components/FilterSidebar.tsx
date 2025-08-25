@@ -200,11 +200,15 @@ export function FilterSidebar() {
           <div className="flex items-center justify-between text-sm font-medium mb-2">
             <div className="flex items-center gap-1">
               <span className="text-muted-foreground">Min:</span>
-              <span className="text-primary">${priceRange[0].toLocaleString('en-US')}</span>
+              <span className="text-primary">
+                ${priceRange[0].toLocaleString("en-US")}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <span className="text-muted-foreground">Max:</span>
-              <span className="text-primary">${priceRange[1].toLocaleString('en-US')}</span>
+              <span className="text-primary">
+                ${priceRange[1].toLocaleString("en-US")}
+              </span>
             </div>
           </div>
 
@@ -223,14 +227,12 @@ export function FilterSidebar() {
               className="w-full"
             />
           </div>
-          
+
           {/* Price range hints */}
           <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
             <span>${MIN_PRICE}</span>
-            <span>${MAX_PRICE.toLocaleString('en-US')}</span>
+            <span>${MAX_PRICE.toLocaleString("en-US")}</span>
           </div>
-
-
         </div>
       </div>
 
