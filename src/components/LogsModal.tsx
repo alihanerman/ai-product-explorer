@@ -96,7 +96,7 @@ export function LogsModal({ isOpen, onClose }: LogsModalProps) {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        {new Date(log.createdAt).toLocaleString('en-US')}
+                        {new Date(log.createdAt).toLocaleString("en-US")}
                       </CardTitle>
                       <span className="text-xs bg-secondary px-2 py-1 rounded">
                         {log.modelUsed}
@@ -126,7 +126,7 @@ export function LogsModal({ isOpen, onClose }: LogsModalProps) {
                       </div>
                       <div className="bg-green-50 dark:bg-green-950/30 p-3 rounded text-sm max-h-48 overflow-y-auto">
                         <div className="prose prose-sm max-w-none">
-                          {log.response.split('\n').map((line, index) => (
+                          {log.response.split("\n").map((line, index) => (
                             <p key={index} className="mb-2 last:mb-0">
                               {line}
                             </p>
