@@ -335,6 +335,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
     if (state.searchQuery) {
       params.set("q", state.searchQuery);
+      params.set("search", state.searchQuery);
     }
     if (state.filters.category) {
       params.set("category", state.filters.category);

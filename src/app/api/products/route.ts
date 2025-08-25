@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
       sortBy: searchParams.get("sortBy") || undefined,
       page: searchParams.get("page") || "1",
       limit: searchParams.get("limit") || "20",
+      search: searchParams.get("search") || undefined,
     };
 
     const validatedParams = ProductFiltersSchema.parse(rawParams);
@@ -44,6 +45,16 @@ export async function GET(request: NextRequest) {
       if (validatedParams.maxPrice !== undefined) {
         where.price.lte = validatedParams.maxPrice;
       }
+    }
+
+    // Add text search functionality
+    if (validatedParams.search) {
+      where.OR = [
+        { name: { contains: validatedParams.search, mode: "insensitive" } },
+        { brand: { contains: validatedParams.search, mode: "insensitive" } },
+        { category: { contains: validatedParams.search, mode: "insensitive" } },
+        { cpu: { contains: validatedParams.search, mode: "insensitive" } },
+      ];
     }
 
     // Build orderBy clause
