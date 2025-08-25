@@ -123,7 +123,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           <h3 className="font-medium text-base sm:text-lg  line-clamp-1">
-            {product.brand}
+            {product.name}
           </h3>
 
           <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground mb-3">
