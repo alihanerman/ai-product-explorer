@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ParseQuerySchema } from "@/lib/validations";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,6 +78,23 @@ Parse this query and return only the JSON:
       console.error("Failed to parse AI response:", aiContent);
       // Fallback: return empty filters
       parsedFilters = {};
+    }
+
+    // Log the search query and AI response
+    try {
+      await prisma.aiLog.create({
+        data: {
+          prompt,
+          response: JSON.stringify({
+            originalQuery: validatedData.query,
+            parsedFilters,
+            aiContent
+          }),
+          modelUsed: "microsoft/phi-3-mini-128k-instruct:free",
+        },
+      });
+    } catch (logError) {
+      console.error("Failed to log search query:", logError);
     }
 
     return NextResponse.json({
