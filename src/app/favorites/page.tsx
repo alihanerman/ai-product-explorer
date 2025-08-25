@@ -112,6 +112,14 @@ export default function FavoritesPage() {
       <Header />
 
       <main className="container mx-auto px-4 py-6 sm:py-8">
+        {/* Breadcrumb Navigation */}
+        <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
+          <Link href="/" className="hover:text-primary transition-colors">
+            Home
+          </Link>
+          <span>/</span>
+          <span className="text-foreground">Favorites</span>
+        </nav>
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">
             Your Favorite Products
