@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SearchBar } from "@/components/SearchBar";
 import { FilterSidebar } from "@/components/FilterSidebar";
@@ -14,6 +14,10 @@ export function HomeContent() {
   const { user, checkAuth } = useAuthStore();
   const { setFavoriteProductIds, initializeFromURL, fetchProducts } =
     useProductStore();
+
+  // State for sidebar toggling
+  const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(true);
+  const [isComparisonTrayOpen, setIsComparisonTrayOpen] = useState(true);
 
   // Sadece ilk yükleme sırasında URL'den parametreleri oku
   useEffect(() => {
@@ -79,13 +83,18 @@ export function HomeContent() {
         </section>
 
         {/* Main Content */}
-        <div className="container mx-auto flex flex-col lg:flex-row min-h-0">
-          <FilterSidebar />
+        <div className="container mx-auto flex flex-col lg:flex-row min-h-0 relative">
+          <FilterSidebar 
+            isOpen={isFilterSidebarOpen} 
+            onToggle={() => setIsFilterSidebarOpen(!isFilterSidebarOpen)} 
+          />
           <ProductGrid />
+          <ComparisonTray 
+            isOpen={isComparisonTrayOpen}
+            onToggle={() => setIsComparisonTrayOpen(!isComparisonTrayOpen)}
+          />
         </div>
       </main>
-
-      <ComparisonTray />
     </>
   );
 }

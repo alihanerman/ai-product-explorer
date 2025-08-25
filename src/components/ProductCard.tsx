@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Plus, Star } from "lucide-react";
+import { Heart, Star, ArrowLeftRight } from "lucide-react";
 import { Product } from "@prisma/client";
 import { Card, CardContent, CardFooter } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -70,8 +70,48 @@ export function ProductCard({ product }: ProductCardProps) {
             className="object-contain p-4 group-hover:scale-105 transition-transform duration-200"
           />
 
-          {/* Action buttons overlay */}
-          <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          {/* Mobile Action buttons - Bottom corners */}
+          <div className="md:hidden">
+            {/* Favorite button - Bottom left */}
+            {user && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleToggleFavorite}
+                isLoading={isTogglingFavorite}
+                className={`absolute bottom-3 left-3 h-9 w-9 p-0 rounded-full backdrop-blur-sm shadow-lg border transition-all duration-200 hover:scale-110 ${
+                  isFavorited
+                    ? "bg-red-500/90 border-red-400 text-white hover:bg-red-600/90"
+                    : "bg-white/90 border-gray-200 text-gray-600 hover:bg-white hover:text-red-500"
+                }`}
+                title={
+                  isFavorited ? "Remove from favorites" : "Add to favorites"
+                }
+              >
+                <Heart
+                  className={`h-4 w-4 transition-all duration-200 ${
+                    isFavorited ? "fill-current scale-110" : ""
+                  }`}
+                />
+              </Button>
+            )}
+
+            {/* Compare button - Bottom right */}
+            {canAddToComparison && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleAddToComparison}
+                className="absolute bottom-3 right-3 h-9 w-9 p-0 rounded-full backdrop-blur-sm bg-white/90 border border-gray-200 text-gray-600 shadow-lg hover:bg-blue-500 hover:text-white hover:border-blue-400 transition-all duration-200 hover:scale-110"
+                title="Add to comparison"
+              >
+                <ArrowLeftRight className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Desktop Action buttons - Top right (hover to show) */}
+          <div className="hidden md:block absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
             {user && (
               <Button
                 size="sm"
@@ -103,7 +143,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 className="h-9 w-9 p-0 rounded-full backdrop-blur-sm bg-white/90 border border-gray-200 text-gray-600 shadow-lg hover:bg-blue-500 hover:text-white hover:border-blue-400 transition-all duration-200 hover:scale-110"
                 title="Add to comparison"
               >
-                <Plus className="h-4 w-4" />
+                <ArrowLeftRight className="h-4 w-4" />
               </Button>
             )}
           </div>
