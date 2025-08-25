@@ -6,7 +6,8 @@ export interface ProductFilters {
   brands?: string[];
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: "price-asc" | "price-desc" | "rating-desc" | "name-asc";
+  sortBy?: "price" | "rating" | "ram_gb" | "storage_gb" | "name";
+  sortDirection?: "asc" | "desc";
 }
 
 export interface ProductState {
@@ -102,19 +103,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
       filters: { ...state.filters, ...newFilters },
       currentPage: 1, // Reset to first page when filters change
     }));
-    // URL'yi güncelle
     setTimeout(() => get().updateURL(), 0);
   },
 
   setSearchQuery: (query) => {
     set({ searchQuery: query });
-    // URL'yi güncelle
     setTimeout(() => get().updateURL(), 0);
   },
   setCurrentPage: (page) => set({ currentPage: page }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
-
   setFavoriteProductIds: (ids) => set({ favoriteProductIds: ids }),
 
   toggleFavorite: (productId) =>
@@ -139,7 +137,6 @@ export const useProductStore = create<ProductState>((set, get) => ({
     })),
 
   clearComparison: () => set({ comparisonList: [], comparisonSummary: null }),
-
   setComparisonSummary: (summary) => set({ comparisonSummary: summary }),
   setComparingLoading: (loading) => set({ isComparingLoading: loading }),
 
@@ -151,6 +148,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     try {
       const params = new URLSearchParams();
 
+      if (state.searchQuery) params.set("search", state.searchQuery);
       if (state.filters.category)
         params.set("category", state.filters.category);
       if (state.filters.brands?.length)
@@ -160,6 +158,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
       if (state.filters.maxPrice !== undefined)
         params.set("maxPrice", state.filters.maxPrice.toString());
       if (state.filters.sortBy) params.set("sortBy", state.filters.sortBy);
+      if (state.filters.sortDirection)
+        params.set("sortDirection", state.filters.sortDirection);
       params.set("page", state.currentPage.toString());
       params.set("limit", "20");
 
@@ -186,7 +186,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  fetchProduct: async (id) => {
+  fetchProduct: async (id: string) => {
     set({ isLoading: true, error: null });
 
     try {
@@ -210,8 +210,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  parseSearchQuery: async (query) => {
-    set({ isLoading: true, error: null });
+  parseSearchQuery: async (query: string) => {
+    set({ isLoading: true, error: null, searchQuery: query });
 
     try {
       const response = await fetch("/api/ai/parse-query", {
@@ -225,25 +225,23 @@ export const useProductStore = create<ProductState>((set, get) => ({
       }
 
       const data = await response.json();
+      const { parsedFilters } = data;
 
-      // Apply the parsed filters
+      // Apply the parsed filters, including sorting
       const newFilters: ProductFilters = {};
-      if (data.parsedFilters.category)
-        newFilters.category = data.parsedFilters.category;
-      if (data.parsedFilters.brands)
-        newFilters.brands = data.parsedFilters.brands;
-      if (data.parsedFilters.minPrice)
-        newFilters.minPrice = data.parsedFilters.minPrice;
-      if (data.parsedFilters.maxPrice)
-        newFilters.maxPrice = data.parsedFilters.maxPrice;
+      if (parsedFilters.category) newFilters.category = parsedFilters.category;
+      if (parsedFilters.brands) newFilters.brands = parsedFilters.brands;
+      if (parsedFilters.minPrice) newFilters.minPrice = parsedFilters.minPrice;
+      if (parsedFilters.maxPrice) newFilters.maxPrice = parsedFilters.maxPrice;
+      if (parsedFilters.sortBy) newFilters.sortBy = parsedFilters.sortBy;
+      if (parsedFilters.sortDirection)
+        newFilters.sortDirection = parsedFilters.sortDirection;
 
-      set((state) => ({
-        filters: { ...state.filters, ...newFilters },
+      set(() => ({
+        filters: newFilters, // Overwrite filters with AI-parsed ones
         currentPage: 1,
-        searchQuery: query,
       }));
 
-      // Fetch products with new filters
       await get().fetchProducts();
     } catch (error) {
       set({
@@ -253,6 +251,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
             : "Failed to parse search query",
         isLoading: false,
       });
+      // Fallback to simple text search if AI fails
+      await get().fetchProducts();
     }
   },
 
@@ -320,6 +320,11 @@ export const useProductStore = create<ProductState>((set, get) => ({
         "sortBy"
       )! as ProductFilters["sortBy"];
     }
+    if (searchParams.get("sortDirection")) {
+      urlFilters.sortDirection = searchParams.get(
+        "sortDirection"
+      )! as ProductFilters["sortDirection"];
+    }
 
     set({
       filters: urlFilters,
@@ -335,7 +340,6 @@ export const useProductStore = create<ProductState>((set, get) => ({
 
     if (state.searchQuery) {
       params.set("q", state.searchQuery);
-      params.set("search", state.searchQuery);
     }
     if (state.filters.category) {
       params.set("category", state.filters.category);
@@ -351,6 +355,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
     if (state.filters.sortBy) {
       params.set("sortBy", state.filters.sortBy);
+    }
+    if (state.filters.sortDirection) {
+      params.set("sortDirection", state.filters.sortDirection);
     }
 
     const newURL = params.toString() ? `/?${params.toString()}` : "/";

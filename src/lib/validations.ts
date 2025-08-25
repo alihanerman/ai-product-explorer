@@ -6,9 +6,12 @@ export const ProductFiltersSchema = z.object({
   brands: z.array(z.string()).optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
+  // Updated sortBy to include new fields from the AI prompt
   sortBy: z
-    .enum(["price-asc", "price-desc", "rating-desc", "name-asc"])
+    .enum(["price", "rating", "ram_gb", "storage_gb", "name"])
     .optional(),
+  // Added sortDirection for AI-driven sorting
+  sortDirection: z.enum(["asc", "desc"]).optional(),
   page: z.coerce.number().min(1).default(1),
   limit: z.coerce.number().min(1).max(100).default(20),
   search: z.string().optional(),
