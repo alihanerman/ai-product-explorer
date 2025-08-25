@@ -54,6 +54,7 @@ export interface ProductState {
   clearComparison: () => void;
   setComparisonSummary: (summary: string | null) => void;
   setComparingLoading: (loading: boolean) => void;
+  resetSearchAndFilters: () => void;
 
   // API actions
   fetchProducts: () => Promise<void>;
@@ -72,7 +73,7 @@ export interface ProductState {
   fetchFavoriteProducts: () => Promise<Product[]>;
   
   // Search API actions
-  fetchSearchSuggestions: () => Promise<any[]>;
+  fetchSearchSuggestions: () => Promise<unknown[]>;
 
   // URL actions
   initializeFromURL: (searchParams: URLSearchParams) => void;
@@ -147,6 +148,22 @@ export const useProductStore = create<ProductState>((set, get) => ({
   clearComparison: () => set({ comparisonList: [], comparisonSummary: null }),
   setComparisonSummary: (summary) => set({ comparisonSummary: summary }),
   setComparingLoading: (loading) => set({ isComparingLoading: loading }),
+
+  resetSearchAndFilters: () => {
+    set({ 
+      searchQuery: "", 
+      filters: {}, 
+      currentPage: 1,
+      error: null 
+    });
+    // Update URL after state reset
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.history.replaceState({}, '', '/');
+      }
+      get().fetchProducts();
+    }, 0);
+  },
 
   // API actions
   fetchProducts: async () => {

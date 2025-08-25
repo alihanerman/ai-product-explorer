@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/stores/authStore";
+import { useProductStore } from "@/lib/stores/productStore";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogsModal } from "@/components/LogsModal";
@@ -10,7 +12,9 @@ import { FileText } from "lucide-react";
 
 export function Header() {
   const { user, logout, checkAuth, isLoading } = useAuthStore();
+  const { resetSearchAndFilters } = useProductStore();
   const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     checkAuth();
@@ -20,10 +24,20 @@ export function Header() {
     await logout();
   };
 
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    resetSearchAndFilters();
+    router.push('/');
+  };
+
   return (
     <header className="border-b bg-background sticky top-0 z-40">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl sm:text-2xl font-bold text-primary">
+        <Link 
+          href="/" 
+          onClick={handleHomeClick}
+          className="text-xl sm:text-2xl font-bold text-primary"
+        >
           <span className="hidden sm:inline">AI Product Explorer</span>
           <span className="sm:hidden">APE</span>
         </Link>
@@ -32,6 +46,7 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-2">
             <Link
               href="/"
+              onClick={handleHomeClick}
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Home

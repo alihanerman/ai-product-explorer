@@ -117,33 +117,33 @@ export function AIRecommendationDisplay({
         sectionType === "winners" &&
         (line.startsWith("-") || line.startsWith("*"))
       ) {
-          if (!parsed.winners) parsed.winners = [];
-          
-          // Try to extract category and product from patterns like:
-          // - **For Budget:** The **Product Name** is the clear winner.
-          // - **For Gaming:** The **Product Name** with its superior RAM is your best bet.
-          const categoryMatch = line.match(/\*\*For\s+(.*?)[\s:]*\*\*/i);
-          const productMatch = line.match(/The\s+\*\*(.*?)\*\*/i);
-          
-          if (categoryMatch && productMatch) {
+        if (!parsed.winners) parsed.winners = [];
+
+        // Try to extract category and product from patterns like:
+        // - **For Budget:** The **Product Name** is the clear winner.
+        // - **For Gaming:** The **Product Name** with its superior RAM is your best bet.
+        const categoryMatch = line.match(/\*\*For\s+(.*?)[\s:]*\*\*/i);
+        const productMatch = line.match(/The\s+\*\*(.*?)\*\*/i);
+
+        if (categoryMatch && productMatch) {
+          parsed.winners.push({
+            category: categoryMatch[1],
+            product: productMatch[1],
+            reason: line.replace(/^[-*]\s*/, "").replace(/\*\*/g, ""),
+          });
+        } else {
+          // Fallback: try to find any two bold text patterns
+          const allMatches = line.match(/\*\*(.*?)\*\*/g);
+          if (allMatches && allMatches.length >= 2) {
             parsed.winners.push({
-              category: categoryMatch[1],
-              product: productMatch[1],
+              category: allMatches[0].replace(/\*\*/g, ""),
+              product: allMatches[1].replace(/\*\*/g, ""),
               reason: line.replace(/^[-*]\s*/, "").replace(/\*\*/g, ""),
             });
-          } else {
-            // Fallback: try to find any two bold text patterns
-            const allMatches = line.match(/\*\*(.*?)\*\*/g);
-            if (allMatches && allMatches.length >= 2) {
-              parsed.winners.push({
-                category: allMatches[0].replace(/\*\*/g, ""),
-                product: allMatches[1].replace(/\*\*/g, ""),
-                reason: line.replace(/^[-*]\s*/, "").replace(/\*\*/g, ""),
-              });
-            }
           }
-          continue;
         }
+        continue;
+      }
 
       // Collect remaining content as summary
       if (!sectionType && line.length > 0) {
@@ -199,8 +199,6 @@ export function AIRecommendationDisplay({
           </CardContent>
         </Card>
       )}
-
-      
 
       {/* Winners Section */}
       {parsedContent.winners && parsedContent.winners.length > 0 && (
@@ -286,8 +284,6 @@ export function AIRecommendationDisplay({
           </CardContent>
         </Card>
       )}
-
-
 
       {/* Fallback: Show raw content if nothing was parsed */}
       {!parsedContent.winners?.length &&

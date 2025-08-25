@@ -12,7 +12,7 @@ import { useProductStore } from "@/lib/stores/productStore";
 export function HomeContent() {
   const searchParams = useSearchParams();
   const { user, checkAuth } = useAuthStore();
-  const { fetchFavorites, initializeFromURL, fetchProducts } =
+  const { fetchFavorites, initializeFromURL, fetchProducts, resetSearchAndFilters } =
     useProductStore();
 
   // State for sidebar toggling (closed by default on mobile, open on desktop)
@@ -55,7 +55,8 @@ export function HomeContent() {
             <div className="text-center mb-4 sm:mb-6">
               <h1
                 id="search-heading"
-                className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2"
+                onClick={resetSearchAndFilters}
+                className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 cursor-pointer hover:text-primary transition-colors"
               >
                 AI-Powered Product Explorer
               </h1>

@@ -30,8 +30,7 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
-// Using Google Gemini API directly
-const GEMINI_MODEL = "gemini-2.0-flash";
+
 
 export async function POST(request: NextRequest) {
   try {
