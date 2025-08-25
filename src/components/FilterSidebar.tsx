@@ -138,12 +138,10 @@ export function FilterSidebar({ isOpen = true, onToggle }: FilterSidebarProps) {
   };
 
   const clearFilters = () => {
-   
     // Use the store's resetSearchAndFilters method to properly clear everything
     resetSearchAndFilters();
     // Reset price range slider
     setPriceRange([MIN_PRICE, MAX_PRICE]);
-   
   };
 
   const hasActiveFilters = Object.keys(filters).length > 0;
@@ -238,7 +236,6 @@ export function FilterSidebar({ isOpen = true, onToggle }: FilterSidebarProps) {
               variant="ghost"
               size="icon"
               onClick={() => {
-                
                 clearFilters();
               }}
               className="!bg-transparent !border-0 !text-red-500 hover:!text-red-600 hover:!bg-red-50 dark:!text-red-400 dark:hover:!text-red-300 dark:hover:!bg-red-950/20"
