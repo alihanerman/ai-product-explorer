@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Clock, MessageSquare, Bot, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { useProductStore } from "@/lib/stores/productStore";
 
 interface AiLog {
   id: string;
@@ -23,6 +24,7 @@ export function LogsModal({ isOpen, onClose }: LogsModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isClearingLogs, setIsClearingLogs] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { clearAllLogs } = useProductStore();
 
   useEffect(() => {
     if (isOpen) {
@@ -47,24 +49,26 @@ export function LogsModal({ isOpen, onClose }: LogsModalProps) {
     }
   };
 
-  const clearAllLogs = async () => {
-    if (!window.confirm("Are you sure you want to clear all logs? This action cannot be undone.")) {
+  const handleClearAllLogs = async () => {
+    if (
+      !window.confirm(
+        "Are you sure you want to clear all logs? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
     setIsClearingLogs(true);
     setError(null);
     try {
-      const response = await fetch("/api/logs", {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        throw new Error("Failed to clear logs");
+      const result = await clearAllLogs();
+      if (result.success) {
+        setLogs([]);
+        // Show success message briefly
+        alert(`Successfully cleared ${result.deletedCount} logs`);
+      } else {
+        setError(result.error || "Failed to clear logs");
       }
-      const data = await response.json();
-      setLogs([]);
-      // Show success message briefly
-      alert(`Successfully cleared ${data.deletedCount} logs`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to clear logs");
     } finally {
@@ -88,7 +92,7 @@ export function LogsModal({ isOpen, onClose }: LogsModalProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={clearAllLogs}
+                onClick={handleClearAllLogs}
                 isLoading={isClearingLogs}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/20"
               >

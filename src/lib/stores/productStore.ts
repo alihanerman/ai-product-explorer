@@ -66,14 +66,17 @@ export interface ProductState {
     usage?: "basic" | "work" | "gaming" | "creative";
     mobility?: "desktop" | "portable" | "ultraportable";
   }) => Promise<void>;
-  
+
   // Favorites API actions
   fetchFavorites: () => Promise<void>;
   toggleFavoriteAPI: (productId: string) => Promise<void>;
   fetchFavoriteProducts: () => Promise<Product[]>;
-  
+
   // Search API actions
   fetchSearchSuggestions: () => Promise<unknown[]>;
+
+  // Logs API actions
+  clearAllLogs: () => Promise<{ success: boolean; deletedCount?: number; error?: string }>;
 
   // URL actions
   initializeFromURL: (searchParams: URLSearchParams) => void;
@@ -150,16 +153,16 @@ export const useProductStore = create<ProductState>((set, get) => ({
   setComparingLoading: (loading) => set({ isComparingLoading: loading }),
 
   resetSearchAndFilters: () => {
-    set({ 
-      searchQuery: "", 
-      filters: {}, 
+    set({
+      searchQuery: "",
+      filters: {},
       currentPage: 1,
-      error: null 
+      error: null,
     });
     // Update URL after state reset
     setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.history.replaceState({}, '', '/');
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/");
       }
       get().fetchProducts();
     }, 0);
@@ -361,7 +364,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   toggleFavoriteAPI: async (productId: string) => {
     const state = get();
     const isFavorited = state.favoriteProductIds.includes(productId);
-    
+
     try {
       const response = await fetch("/api/favorites", {
         method: "POST",
@@ -423,6 +426,35 @@ export const useProductStore = create<ProductState>((set, get) => ({
     } catch (error) {
       console.error("Failed to fetch suggestions:", error);
       return [];
+    }
+  },
+
+  // Logs API actions
+  clearAllLogs: async () => {
+    try {
+      const response = await fetch("/api/logs", {
+        method: "DELETE",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return { 
+          success: true, 
+          deletedCount: data.deletedCount 
+        };
+      } else {
+        const errorData = await response.json();
+        return { 
+          success: false, 
+          error: errorData.error || "Failed to clear logs" 
+        };
+      }
+    } catch (error) {
+      console.error("Failed to clear logs:", error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : "Failed to clear logs" 
+      };
     }
   },
 
