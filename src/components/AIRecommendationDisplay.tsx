@@ -25,6 +25,38 @@ interface ParsedContent {
   summary?: string;
 }
 
+function parseVerdictTable(
+  tableContent: string
+): Array<{ value: string; choice: string; reason: string }> {
+  const rows = tableContent
+    .trim()
+    .split("\n")
+    .filter((row) => row.trim());
+  if (rows.length < 3) return [];
+
+  const dataRows = rows.slice(2);
+  return dataRows
+    .map((row) => {
+      const cells = row
+        .split("|")
+        .map((cell) => cell.trim())
+        .filter((cell) => cell);
+      if (cells.length >= 3) {
+        return {
+          value: cells[0].replace(/\*\*/g, ""),
+          choice: cells[1].replace(/\*\*/g, ""),
+          reason: cells[2].replace(/\*\*/g, ""),
+        };
+      }
+      return null;
+    })
+    .filter(Boolean) as Array<{
+    value: string;
+    choice: string;
+    reason: string;
+  }>;
+}
+
 export function AIRecommendationDisplay({
   content,
 }: AIRecommendationDisplayProps) {
@@ -153,36 +185,6 @@ export function AIRecommendationDisplay({
 
     return parsed;
   }, [content]);
-
-  const parseVerdictTable = (tableContent: string) => {
-    const rows = tableContent
-      .trim()
-      .split("\n")
-      .filter((row) => row.trim());
-    if (rows.length < 3) return [];
-
-    const dataRows = rows.slice(2);
-    return dataRows
-      .map((row) => {
-        const cells = row
-          .split("|")
-          .map((cell) => cell.trim())
-          .filter((cell) => cell);
-        if (cells.length >= 3) {
-          return {
-            value: cells[0].replace(/\*\*/g, ""),
-            choice: cells[1].replace(/\*\*/g, ""),
-            reason: cells[2].replace(/\*\*/g, ""),
-          };
-        }
-        return null;
-      })
-      .filter(Boolean) as Array<{
-      value: string;
-      choice: string;
-      reason: string;
-    }>;
-  };
 
   return (
     <div className="space-y-6">
